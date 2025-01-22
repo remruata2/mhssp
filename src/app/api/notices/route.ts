@@ -52,12 +52,11 @@ export async function POST(req: Request) {
     const formData = await req.formData();
     const title = formData.get('title') as string;
     const type = formData.get('type') as 'document' | 'url';
-    const category = formData.get('category') as string;
     const isPublished = formData.get('isPublished') === 'true';
     const publishDate = formData.get('publishDate') as string;
     
     // Validate required fields
-    if (!title || !type || !category || !publishDate) {
+    if (!title || !type || !publishDate) {
       return NextResponse.json(
         { success: false, error: 'Missing required fields' },
         { status: 400 }
@@ -67,21 +66,30 @@ export async function POST(req: Request) {
     const noticeData: any = {
       title,
       type,
-      category,
       isPublished: isPublished ? true : false,
       publishDate: new Date(publishDate),
     };
 
     // Handle document type
     if (type === 'document') {
-      const documentFile = formData.get('document') as File;
-      if (!documentFile) {
+      const documentFile = formData.get('pdf') as File;
+      const documentUrl = formData.get('documentUrl') as string;
+
+      // Check if either file or URL is provided
+      if (!documentFile && !documentUrl) {
         return NextResponse.json(
-          { success: false, error: 'Document file is required for document type notices' },
+          { success: false, error: 'Either document file or document URL is required' },
           { status: 400 }
         );
       }
-      noticeData.documentUrl = await savePDF(documentFile);
+
+      // If file is provided, save it and use its path
+      if (documentFile) {
+        noticeData.documentUrl = await savePDF(documentFile);
+      } else {
+        // If URL is provided, use it directly
+        noticeData.documentUrl = documentUrl;
+      }
     }
     
     // Handle URL type
@@ -96,14 +104,22 @@ export async function POST(req: Request) {
       noticeData.url = url;
     }
 
-    // Create the notice
     const notice = await Notice.create(noticeData);
+    
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Notice created successfully',
+      data: notice 
+    });
 
-    return NextResponse.json({ success: true, data: notice });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating notice:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to create notice' },
+      { 
+        success: false, 
+        error: error.message || 'Failed to create notice',
+        details: process.env.NODE_ENV === 'development' ? error : undefined
+      },
       { status: 500 }
     );
   }

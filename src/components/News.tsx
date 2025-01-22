@@ -9,7 +9,6 @@ interface NewsItem {
   title: string;
   content: string;
   publishDate: string;
-  category: string;
 }
 
 export default function News() {
@@ -86,12 +85,6 @@ export default function News() {
                 >
                   <h4 className="text-lg font-medium text-gray-900">{item.title}</h4>
                   <p className="mt-2 text-gray-600">{item.content}</p>
-                  <div className="flex flex-wrap items-center gap-3 mt-2 text-sm">
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full font-medium bg-blue-100 text-blue-800`}>
-                      <FaNewspaper className="mr-1" />
-                      {item.category}
-                    </span>
-                  </div>
                 </motion.div>
               ))}
             </div>

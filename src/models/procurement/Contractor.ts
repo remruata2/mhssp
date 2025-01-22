@@ -7,8 +7,6 @@ export interface IContractor extends Document {
   address?: string;
   createdAt: Date;
   updatedAt: Date;
-  // Virtual fields
-  totalContracts?: number;
 }
 
 const contractorSchema = new mongoose.Schema<IContractor>(
@@ -45,23 +43,13 @@ const contractorSchema = new mongoose.Schema<IContractor>(
     }
   },
   { 
-    timestamps: true,
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true }
+    timestamps: true
   }
 );
 
 // Create indexes for better query performance
 contractorSchema.index({ name: 1 });
 contractorSchema.index({ email: 1 });
-
-// Virtual for total contracts by this contractor
-contractorSchema.virtual('totalContracts', {
-  ref: 'GoodsProcurement',
-  localField: '_id',
-  foreignField: 'contractor',
-  count: true
-});
 
 // Pre-save middleware
 contractorSchema.pre('save', function(next) {

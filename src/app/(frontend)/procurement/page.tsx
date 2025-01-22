@@ -16,19 +16,29 @@ interface CivilWork {
 
 interface Goods {
   _id: string;
-  lotNo: number;
-  contractNo: number;
+  referenceNo: number;
+  goodsCategory: {
+    _id: string;
+    name: string;
+  };
   itemName: string;
+  quantity: number;
   contractSignedDate: string;
-  supplier: string;
+  contractor: {
+    _id: string;
+    name: string;
+  };
 }
 
 interface Consultancy {
   _id: string;
-  contractNo: number;
-  serviceName: string;
-  contractSignedDate: string;
-  consultant: string;
+  contractBidNo: string;
+  consultancyServices: string;
+  contractSigned: string;
+  contractor: {
+    _id: string;
+    name: string;
+  };
 }
 
 export default function ProcurementPage() {
@@ -196,19 +206,22 @@ export default function ProcurementPage() {
                       S. No.
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Lot Number
+                      Reference No
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Contract/BID No
+                      Category
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Item Name
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Quantity
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Contract Signed
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Supplier
+                      Awarded To
                     </th>
                   </tr>
                 </thead>
@@ -219,19 +232,22 @@ export default function ProcurementPage() {
                         {index + 1}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        Lot {item.lotNo}
+                        GD-{item.referenceNo}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        GD-{item.contractNo}
+                        {item.goodsCategory.name}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900">
                         {item.itemName}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {item.quantity}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {formatDate(item.contractSignedDate)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {item.supplier}
+                        {item.contractor.name}
                       </td>
                     </tr>
                   ))}
@@ -255,33 +271,33 @@ export default function ProcurementPage() {
                       Contract/BID No
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Service Name
+                      Consultancy Services
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Contract Signed
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Consultant
+                      Awarded To
                     </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {consultancy.map((service, index) => (
-                    <tr key={service._id} className="hover:bg-gray-50">
+                  {consultancy.map((item, index) => (
+                    <tr key={item._id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {index + 1}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        CS-{service.contractNo}
+                        {item.contractBidNo}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900">
-                        {service.serviceName}
+                        {item.consultancyServices}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {formatDate(service.contractSignedDate)}
+                        {formatDate(item.contractSigned)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {service.consultant}
+                        {item.contractor.name}
                       </td>
                     </tr>
                   ))}

@@ -25,8 +25,8 @@ export default function NewGoodsPage() {
     goodsCategory: '',
     itemName: '',
     quantity: '',
-    contractor: '',
     contractSignedDate: '',
+    contractor: '',
   });
 
   useEffect(() => {
@@ -119,6 +119,7 @@ export default function NewGoodsPage() {
               onChange={handleChange}
               className="form-input"
               required
+              min="1"
             />
           </div>
 
@@ -155,6 +156,8 @@ export default function NewGoodsPage() {
               onChange={handleChange}
               className="form-input"
               required
+              minLength={3}
+              maxLength={100}
             />
           </div>
 
@@ -170,6 +173,23 @@ export default function NewGoodsPage() {
               onChange={handleChange}
               className="form-input"
               required
+              min="1"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="contractSignedDate" className="form-label">
+              Contract Signed Date
+            </label>
+            <input
+              type="date"
+              id="contractSignedDate"
+              name="contractSignedDate"
+              value={formData.contractSignedDate}
+              onChange={handleChange}
+              className="form-input"
+              required
+              max={new Date().toISOString().split('T')[0]}
             />
           </div>
 
@@ -194,32 +214,25 @@ export default function NewGoodsPage() {
             </select>
           </div>
 
-          <div>
-            <label htmlFor="contractSignedDate" className="form-label">
-              Contract Signed Date
-            </label>
-            <input
-              type="date"
-              id="contractSignedDate"
-              name="contractSignedDate"
-              value={formData.contractSignedDate}
-              onChange={handleChange}
-              className="form-input"
-              required
-            />
-          </div>
-
           {error && (
-            <div className="text-red-500 text-sm">{error}</div>
+            <div className="bg-red-50 text-red-500 p-4 rounded-md">
+              {error}
+            </div>
           )}
 
-          <div className="flex justify-end">
+          <div className="flex justify-end space-x-4">
+            <Link
+              href="/admin/procurement/goods"
+              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+            >
+              Cancel
+            </Link>
             <button
               type="submit"
               disabled={loading}
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+              className="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50"
             >
-              {loading ? 'Creating...' : 'Create Goods Procurement'}
+              {loading ? 'Saving...' : 'Save Goods Procurement'}
             </button>
           </div>
         </form>

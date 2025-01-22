@@ -89,15 +89,6 @@ export default function ProcurementDashboard() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </Link>
-            <Link
-              href="/admin/procurement/civil-works/new"
-              className="flex items-center text-emerald-600 hover:text-emerald-700 group-hover:translate-x-1 transition-transform duration-200"
-            >
-              <span>Add New Civil Work</span>
-              <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
           </div>
         </div>
 
@@ -133,15 +124,6 @@ export default function ProcurementDashboard() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </Link>
-            <Link
-              href="/admin/procurement/goods/new"
-              className="flex items-center text-amber-600 hover:text-amber-700 group-hover:translate-x-1 transition-transform duration-200"
-            >
-              <span>Add New Goods</span>
-              <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
           </div>
         </div>
 
@@ -164,15 +146,6 @@ export default function ProcurementDashboard() {
               className="flex items-center text-purple-600 hover:text-purple-700 group-hover:translate-x-1 transition-transform duration-200"
             >
               <span>View All Consultancies</span>
-              <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
-            <Link
-              href="/admin/procurement/consultancy/new"
-              className="flex items-center text-purple-600 hover:text-purple-700 group-hover:translate-x-1 transition-transform duration-200"
-            >
-              <span>Add New Consultancy</span>
               <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>

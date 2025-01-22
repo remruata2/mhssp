@@ -48,11 +48,6 @@ const noticeSchema = new mongoose.Schema({
       message: 'Please enter a valid URL (can be a local path starting with / or a full URL)'
     }
   },
-  category: {
-    type: String,
-    required: [true, 'Category is required'],
-    enum: ['General', 'Important', 'Announcement', 'Tender'],
-  },
   isPublished: {
     type: Boolean,
     default: false,

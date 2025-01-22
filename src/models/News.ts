@@ -10,11 +10,6 @@ const NewsSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Please provide content']
   },
-  category: {
-    type: String,
-    required: [true, 'Please specify a category'],
-    enum: ['General', 'Health', 'Schemes', 'Events']
-  },
   isPublished: {
     type: Boolean,
     default: false

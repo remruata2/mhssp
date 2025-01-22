@@ -11,7 +11,6 @@ interface Notice {
   type: 'document' | 'url';
   documentUrl?: string;
   url?: string;
-  category: string;
 }
 
 export default function NoticeBoard() {

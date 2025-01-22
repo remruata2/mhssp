@@ -1,14 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FaFilePdf, FaEdit, FaTrash, FaFolder, FaCalendar, FaUpload, FaLink } from 'react-icons/fa';
+import { FaFilePdf, FaEdit, FaTrash, FaPlus, FaCalendar, FaUpload, FaLink } from 'react-icons/fa';
+import SlideOver from '@/components/SlideOver';
 
 interface Notice {
   _id: string;
   title: string;
   type: 'document' | 'url';
-  documentUrl?: string;
-  url?: string;
+  documentUrl: string;
+  url: string;
   category: string;
   publishDate: string;
   isPublished: boolean;
@@ -20,20 +21,20 @@ export default function NoticesPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingId, setEditingId] = useState('');
 
   const [formData, setFormData] = useState({
     title: '',
     type: 'document',
     documentUrl: '',
     url: '',
-    category: '',
     isPublished: false,
     publishDate: new Date().toISOString().split('T')[0],
   });
 
   const [pdfFile, setPdfFile] = useState<File | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editingId, setEditingId] = useState('');
 
   useEffect(() => {
     fetchNotices();
@@ -89,25 +90,41 @@ export default function NoticesPage() {
 
     try {
       // Validate based on notice type
-      if (formData.type === 'document' && !isEditing && !pdfFile) {
-        throw new Error('Please upload a PDF file');
-      }
-      if (formData.type === 'url' && !formData.url) {
+      if (formData.type === 'document') {
+        if (!isEditing && !pdfFile && !formData.documentUrl) {
+          throw new Error('Please either upload a PDF file or provide a document URL');
+        }
+        if (formData.documentUrl) {
+          // Allow Google Drive URLs and direct PDF URLs
+          const isValidUrl = formData.documentUrl.match(/^https?:\/\//i) && (
+            formData.documentUrl.match(/\.pdf$/i) ||
+            formData.documentUrl.match(/drive\.google\.com.*\/file\/d\/.*\/view/i) ||
+            formData.documentUrl.match(/docs\.google\.com.*\/document\/d\/.*\/edit/i)
+          );
+          if (!isValidUrl) {
+            throw new Error('Please enter a valid document URL (PDF or Google Drive document)');
+          }
+        }
+      } else if (formData.type === 'url' && !formData.url) {
         throw new Error('Please enter a URL');
       }
 
       const formDataToSend = new FormData();
       formDataToSend.append('title', formData.title);
       formDataToSend.append('type', formData.type);
-      formDataToSend.append('category', formData.category);
       formDataToSend.append('isPublished', String(formData.isPublished));
       formDataToSend.append('publishDate', formData.publishDate);
-      
-      if (pdfFile) {
-        formDataToSend.append('document', pdfFile);
-      }
 
-      if (formData.type === 'url') {
+      if (formData.type === 'document') {
+        // If we have a file, append it
+        if (pdfFile) {
+          formDataToSend.append('pdf', pdfFile);
+        }
+        // If we have a document URL, append it
+        if (formData.documentUrl) {
+          formDataToSend.append('documentUrl', formData.documentUrl);
+        }
+      } else {
         formDataToSend.append('url', formData.url);
       }
 
@@ -119,23 +136,29 @@ export default function NoticesPage() {
         body: formDataToSend,
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to save notice');
+      const data = await response.json();
+
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to save notice');
       }
 
       setSuccessMessage(isEditing ? 'Notice updated successfully!' : 'Notice added successfully!');
-      resetForm();
+      setFormData({
+        title: '',
+        type: 'document',
+        documentUrl: '',
+        url: '',
+        isPublished: false,
+        publishDate: new Date().toISOString().split('T')[0],
+      });
+      setPdfFile(null);
+      setIsEditing(false);
+      setEditingId('');
       fetchNotices();
 
-      setTimeout(() => {
-        setSuccessMessage(null);
-      }, 3000);
-
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
-      setError(errorMessage);
-      console.error('Error saving notice:', err);
+    } catch (err: any) {
+      setError(err.message);
+      console.error('Error submitting notice:', err);
     } finally {
       setIsLoading(false);
     }
@@ -154,11 +177,11 @@ export default function NoticesPage() {
       type: notice.type,
       documentUrl: notice.documentUrl,
       url: notice.url,
-      category: notice.category,
       isPublished: notice.isPublished,
       publishDate: formattedDate,
     });
     setPdfFile(null);
+    setIsModalOpen(true);
   };
 
   const handleDelete = async (id: string) => {
@@ -193,7 +216,6 @@ export default function NoticesPage() {
       type: 'document',
       documentUrl: '',
       url: '',
-      category: '',
       isPublished: false,
       publishDate: new Date().toISOString().split('T')[0],
     });
@@ -205,8 +227,19 @@ export default function NoticesPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold text-gray-800">Manage Notices</h1>
+      <h1 className="text-2xl font-semibold text-gray-800">Manage Notices</h1>
+        <button
+           onClick={() => {
+            setIsModalOpen(true);
+            resetForm();
+          }}
+          className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 flex items-center gap-2"
+        >
+          <FaPlus className="h-4 w-4" />
+          Add Notices
+        </button>
       </div>
+      
 
       <div className="flex gap-6">
         {/* Notices List - Left Side */}
@@ -219,97 +252,115 @@ export default function NoticesPage() {
           ) : notices.length === 0 ? (
             <div className="text-gray-500 text-center p-4">No notices found</div>
           ) : (
-            <div className="space-y-4">
-              {notices.map((item) => (
-                <div
-                  key={item._id}
-                  className="border rounded-lg p-4 hover:shadow-md transition-shadow"
-                >
-                  <div className="flex justify-between items-start mb-2">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-lg font-medium text-gray-800">
-                          {item.title}
-                        </h3>
-                        <span
-                          className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                            item.isPublished
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-yellow-100 text-yellow-800'
-                          }`}
-                        >
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Title
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Type
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Date
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {notices.map((item) => (
+                    <tr key={item._id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4">
+                        <div className="flex flex-col">
+                          <div className="text-sm font-medium text-gray-900">{item.title}</div>
+                          <a 
+                            href={item.type === 'document' ? item.documentUrl : item.url} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="flex items-center gap-2 text-blue-600 hover:text-blue-800 text-sm mt-1"
+                          >
+                            {item.type === 'document' ? (
+                              <>
+                                <FaFilePdf className="h-4 w-4" />
+                                View Document
+                              </>
+                            ) : (
+                              <>
+                                <FaLink className="h-4 w-4" />
+                                View URL
+                              </>
+                            )}
+                          </a>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm text-gray-500">
+                          {item.type === 'document' ? 'PDF Document' : 'External URL'}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                          item.isPublished
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-yellow-100 text-yellow-800'
+                        }`}>
                           {item.isPublished ? 'Published' : 'Draft'}
                         </span>
-                      </div>
-                      <div className="flex items-center gap-2 text-blue-600 hover:text-blue-800">
-                        {item.type === 'document' ? (
-                          <FaFilePdf className="h-4 w-4" />
-                        ) : (
-                          <FaLink className="h-4 w-4" />
-                        )}
-                        <a href={item.type === 'document' ? item.documentUrl : item.url} target="_blank" rel="noopener noreferrer" className="text-sm">
-                          {item.type === 'document' ? 'View Document' : 'View URL'}
-                        </a>
-                      </div>
-                    </div>
-                    <div className="flex space-x-2 ml-4">
-                      <button
-                        onClick={() => handleEdit(item)}
-                        className="text-blue-600 hover:text-blue-800 transition-colors"
-                        title="Edit"
-                      >
-                        <FaEdit className="h-5 w-5" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(item._id)}
-                        className="text-red-600 hover:text-red-800 transition-colors"
-                        title="Delete"
-                      >
-                        <FaTrash className="h-5 w-5" />
-                      </button>
-                    </div>
-                  </div>
-                  <div className="flex justify-between items-center text-sm text-gray-500 mt-2">
-                    <span className="flex items-center gap-2">
-                      <FaFolder className="h-4 w-4" />
-                      {item.category}
-                    </span>
-                    <span className="flex items-center gap-2">
-                      <FaCalendar className="h-4 w-4" />
-                      {new Date(item.publishDate).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric'
-                      })}
-                    </span>
-                  </div>
-                </div>
-              ))}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center text-sm text-gray-500">
+                          <FaCalendar className="h-4 w-4 mr-2" />
+                          {new Date(item.publishDate).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
+                          })}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex justify-end space-x-2">
+                          <button
+                            onClick={() => handleEdit(item)}
+                            className="text-blue-600 hover:text-blue-800 transition-colors"
+                            title="Edit"
+                          >
+                            <FaEdit className="h-5 w-5" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(item._id)}
+                            className="text-red-600 hover:text-red-800 transition-colors"
+                            title="Delete"
+                          >
+                            <FaTrash className="h-5 w-5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </div>
 
         {/* Notice Form - Right Side */}
-        <div className="w-[400px] bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold mb-4">
-            {isEditing ? 'Edit Notice' : 'Add Notice'}
-          </h2>
-
-          {successMessage && (
-            <div className="mb-4 p-3 bg-green-100 text-green-700 rounded-md">
-              {successMessage}
-            </div>
-          )}
-
-          {error && (
-            <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
-              {error}
-            </div>
-          )}
-
+        <SlideOver
+          title={isEditing ? "Edit Notice" : "Add Notice"}
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+            resetForm();
+          }}
+        >
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="form-label">
                 Title <span className="text-red-500">*</span>
               </label>
               <input
@@ -317,7 +368,7 @@ export default function NoticesPage() {
                 name="title"
                 value={formData.title}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="form-input"
                 required
                 minLength={3}
                 maxLength={100}
@@ -328,14 +379,14 @@ export default function NoticesPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="form-label">
                 Type <span className="text-red-500">*</span>
               </label>
               <select
                 name="type"
                 value={formData.type}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="form-select"
                 required
               >
                 <option value="document">Document</option>
@@ -344,76 +395,94 @@ export default function NoticesPage() {
             </div>
 
             {formData.type === 'document' ? (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  PDF File {!isEditing && <span className="text-red-500">*</span>}
-                </label>
-                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-                  <div className="space-y-1 text-center">
-                    <FaUpload className="mx-auto h-12 w-12 text-gray-400" />
-                    <div className="flex text-sm text-gray-600">
-                      <label className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
-                        <span>Upload a file</span>
-                        <input
-                          type="file"
-                          name="pdf"
-                          accept=".pdf"
-                          onChange={handleFileChange}
-                          className="sr-only"
-                        />
+              <>
+                <div>
+                  <label className="form-label">
+                    Document Source <span className="text-red-500">*</span>
+                  </label>
+                  <div className="flex flex-col space-y-4">
+                    {/* Document URL Input */}
+                    <div>
+                      <label className="form-label text-sm text-gray-600">
+                        Document URL
                       </label>
-                      <p className="pl-1">or drag and drop</p>
+                      <input
+                        type="url"
+                        name="documentUrl"
+                        value={formData.documentUrl}
+                        onChange={handleChange}
+                        placeholder="Enter PDF URL or Google Drive document link"
+                        className="form-input"
+                      />
+                      <p className="mt-1 text-xs text-gray-500">
+                        Accepts direct PDF URLs or Google Drive document links (e.g., https://drive.google.com/file/d/...)
+                      </p>
                     </div>
-                    <p className="text-xs text-gray-500">PDF up to 10MB</p>
+
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-gray-300"></div>
+                      </div>
+                      <div className="relative flex justify-center text-sm">
+                        <span className="px-2 bg-white text-gray-500">OR</span>
+                      </div>
+                    </div>
+
+                    {/* File Upload */}
+                    <div>
+                      <label className="form-label text-sm text-gray-600">
+                        Upload PDF File
+                      </label>
+                      <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-indigo-500 transition-colors">
+                        <div className="space-y-1 text-center">
+                          <FaUpload className="mx-auto h-12 w-12 text-gray-400" />
+                          <div className="flex text-sm text-gray-600">
+                            <label className="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500">
+                              <span>Upload a file</span>
+                              <input
+                                type="file"
+                                name="pdf"
+                                accept=".pdf"
+                                onChange={handleFileChange}
+                                className="sr-only"
+                              />
+                            </label>
+                            <p className="pl-1">or drag and drop</p>
+                          </div>
+                          <p className="text-xs text-gray-500">PDF up to 10MB</p>
+                        </div>
+                      </div>
+                      {pdfFile && (
+                        <p className="mt-2 text-sm text-gray-500">
+                          Selected file: {pdfFile.name}
+                        </p>
+                      )}
+                    </div>
                   </div>
-                </div>
-                {pdfFile && (
-                  <p className="mt-2 text-sm text-gray-500">
-                    Selected file: {pdfFile.name}
+                  <p className="mt-2 text-xs text-gray-500">
+                    Either provide a document URL or upload a PDF file
                   </p>
-                )}
-              </div>
+                </div>
+              </>
             ) : (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="form-label">
                   URL <span className="text-red-500">*</span>
                 </label>
                 <input
-                  type="text"
+                  type="url"
                   name="url"
                   value={formData.url}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  placeholder="Enter URL (e.g., /pages/about or https://example.com)"
+                  className="form-input"
                   required
+                  placeholder="https://example.com"
                 />
-                <p className="mt-1 text-sm text-gray-500">
-                  You can enter a local path (e.g., /pages/about) or a full URL (e.g., https://example.com)
-                </p>
               </div>
             )}
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Category <span className="text-red-500">*</span>
-              </label>
-              <select
-                name="category"
-                value={formData.category}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-                required
-              >
-                <option value="">Select a category</option>
-                <option value="General">General</option>
-                <option value="Important">Important</option>
-                <option value="Announcement">Announcement</option>
-                <option value="Tender">Tender</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="form-label">
                 Publish Date <span className="text-red-500">*</span>
               </label>
               <input
@@ -421,7 +490,7 @@ export default function NoticesPage() {
                 name="publishDate"
                 value={formData.publishDate}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="form-input"
                 required
               />
             </div>
@@ -444,7 +513,10 @@ export default function NoticesPage() {
               {isEditing && (
                 <button
                   type="button"
-                  onClick={resetForm}
+                  onClick={() => {
+                    setIsModalOpen(false);
+                    resetForm();
+                  }}
                   className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                   disabled={isLoading}
                 >
@@ -471,7 +543,9 @@ export default function NoticesPage() {
               </button>
             </div>
           </form>
-        </div>
+        </SlideOver>
+
+        
       </div>
     </div>
   );

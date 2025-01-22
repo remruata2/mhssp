@@ -1,47 +1,36 @@
 import mongoose from 'mongoose';
 
+// Clear any existing model to prevent the duplicate index warning
+if (mongoose.models.ConsultancyProcurement) {
+  delete mongoose.models.ConsultancyProcurement;
+}
+
 const ConsultancyProcurementSchema = new mongoose.Schema({
-  referenceNo: {
-    type: Number,
-    required: [true, 'Please provide a reference number'],
+  contractBidNo: {
+    type: String,
+    required: [true, 'Please provide a Contract/BID number'],
     unique: true,
   },
-  consultancyName: {
+  consultancyServices: {
     type: String,
-    required: [true, 'Please provide a consultancy name'],
+    required: [true, 'Please provide consultancy services details'],
   },
-  scope: {
-    type: String,
-    required: [true, 'Please provide the scope of work'],
+  contractSigned: {
+    type: Date,
+    required: [true, 'Please provide contract signed date'],
   },
   contractor: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Contractor',
     required: [true, 'Please provide a contractor'],
-  },
-  contractValue: {
-    type: Number,
-    required: [true, 'Please provide contract value'],
-  },
-  contractSignedDate: {
-    type: Date,
-    required: [true, 'Please provide a contract signed date'],
-  },
-  startDate: {
-    type: Date,
-    required: [true, 'Please provide a start date'],
-  },
-  endDate: {
-    type: Date,
-    required: [true, 'Please provide an end date'],
-  },
-  status: {
-    type: String,
-    enum: ['Not Started', 'In Progress', 'Completed', 'Terminated'],
-    default: 'Not Started',
-  },
+  }
 }, {
   timestamps: true,
 });
 
-export default mongoose.models.ConsultancyProcurement || mongoose.model('ConsultancyProcurement', ConsultancyProcurementSchema);
+// Remove any existing indexes to prevent duplicates
+ConsultancyProcurementSchema.indexes().forEach(index => {
+  ConsultancyProcurementSchema.index(index[0], index[1]);
+});
+
+export default mongoose.model('ConsultancyProcurement', ConsultancyProcurementSchema);

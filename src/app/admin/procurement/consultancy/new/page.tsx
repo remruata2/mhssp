@@ -15,13 +15,10 @@ export default function NewConsultancyPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    status: '',
-    startDate: '',
-    endDate: '',
-    consultant: '',
-    budget: '',
+    contractBidNo: '',
+    consultancyServices: '',
+    contractSigned: '',
+    contractor: '',
   });
 
   useEffect(() => {
@@ -51,10 +48,7 @@ export default function NewConsultancyPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ...formData,
-          budget: parseFloat(formData.budget),
-        }),
+        body: JSON.stringify(formData),
       });
 
       const data = await response.json();
@@ -72,7 +66,11 @@ export default function NewConsultancyPage() {
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   return (
@@ -90,14 +88,14 @@ export default function NewConsultancyPage() {
       <div className="bg-white shadow-md rounded-lg p-6">
         <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl">
           <div>
-            <label htmlFor="title" className="form-label">
-              Title
+            <label htmlFor="contractBidNo" className="form-label">
+              Contract/BID No
             </label>
             <input
               type="text"
-              id="title"
-              name="title"
-              value={formData.title}
+              id="contractBidNo"
+              name="contractBidNo"
+              value={formData.contractBidNo}
               onChange={handleChange}
               className="form-input"
               required
@@ -105,13 +103,13 @@ export default function NewConsultancyPage() {
           </div>
 
           <div>
-            <label htmlFor="description" className="form-label">
-              Description
+            <label htmlFor="consultancyServices" className="form-label">
+              Consultancy Services
             </label>
             <textarea
-              id="description"
-              name="description"
-              value={formData.description}
+              id="consultancyServices"
+              name="consultancyServices"
+              value={formData.consultancyServices}
               onChange={handleChange}
               rows={4}
               className="form-textarea"
@@ -120,95 +118,60 @@ export default function NewConsultancyPage() {
           </div>
 
           <div>
-            <label htmlFor="status" className="form-label">
-              Status
+            <label htmlFor="contractSigned" className="form-label">
+              Contract Signed Date
+            </label>
+            <input
+              type="date"
+              id="contractSigned"
+              name="contractSigned"
+              value={formData.contractSigned}
+              onChange={handleChange}
+              className="form-input"
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="contractor" className="form-label">
+              Contractor
             </label>
             <select
-              id="status"
-              name="status"
-              value={formData.status}
+              id="contractor"
+              name="contractor"
+              value={formData.contractor}
               onChange={handleChange}
               className="form-select"
               required
             >
-              <option value="">Select a status</option>
-              <option value="planning">Planning</option>
-              <option value="ongoing">Ongoing</option>
-              <option value="completed">Completed</option>
+              <option value="">Select a contractor</option>
+              {contractors.map((contractor) => (
+                <option key={contractor._id} value={contractor._id}>
+                  {contractor.name}
+                </option>
+              ))}
             </select>
           </div>
 
-          <div>
-            <label htmlFor="startDate" className="form-label">
-              Start Date
-            </label>
-            <input
-              type="date"
-              id="startDate"
-              name="startDate"
-              value={formData.startDate}
-              onChange={handleChange}
-              className="form-input"
-              required
-            />
-          </div>
-
-          <div>
-            <label htmlFor="endDate" className="form-label">
-              End Date
-            </label>
-            <input
-              type="date"
-              id="endDate"
-              name="endDate"
-              value={formData.endDate}
-              onChange={handleChange}
-              className="form-input"
-              required
-            />
-          </div>
-
-          <div>
-            <label htmlFor="consultant" className="form-label">
-              Consultant
-            </label>
-            <input
-              type="text"
-              id="consultant"
-              name="consultant"
-              value={formData.consultant}
-              onChange={handleChange}
-              className="form-input"
-              required
-            />
-          </div>
-
-          <div>
-            <label htmlFor="budget" className="form-label">
-              Budget (in INR)
-            </label>
-            <input
-              type="number"
-              id="budget"
-              name="budget"
-              value={formData.budget}
-              onChange={handleChange}
-              className="form-input"
-              required
-            />
-          </div>
-
           {error && (
-            <div className="text-red-500 text-sm">{error}</div>
+            <div className="bg-red-50 text-red-500 p-4 rounded-md">
+              {error}
+            </div>
           )}
 
-          <div className="flex justify-end">
+          <div className="flex justify-end space-x-4">
+            <Link
+              href="/admin/procurement/consultancy"
+              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+            >
+              Cancel
+            </Link>
             <button
               type="submit"
               disabled={loading}
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+              className="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50"
             >
-              {loading ? 'Creating...' : 'Create Consultancy'}
+              {loading ? 'Saving...' : 'Save Consultancy'}
             </button>
           </div>
         </form>

@@ -15,13 +15,11 @@ export default function NewCivilWorkPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    status: '',
-    startDate: '',
-    endDate: '',
-    location: '',
-    budget: '',
+    lotNo: '',
+    contractNo: '',
+    workName: '',
+    contractSignedDate: '',
+    contractor: '',
   });
 
   useEffect(() => {
@@ -87,14 +85,46 @@ export default function NewCivilWorkPage() {
       <div className="bg-white shadow-md rounded-lg p-6">
         <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl">
           <div>
-            <label htmlFor="title" className="form-label">
-              Title
+            <label htmlFor="lotNo" className="form-label">
+              Lot No
+            </label>
+            <input
+              type="number"
+              id="lotNo"
+              name="lotNo"
+              value={formData.lotNo}
+              onChange={handleChange}
+              className="form-input"
+              required
+              min="1"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="contractNo" className="form-label">
+              Contract No
+            </label>
+            <input
+              type="number"
+              id="contractNo"
+              name="contractNo"
+              value={formData.contractNo}
+              onChange={handleChange}
+              className="form-input"
+              required
+              min="1"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="workName" className="form-label">
+              Work Name
             </label>
             <input
               type="text"
-              id="title"
-              name="title"
-              value={formData.title}
+              id="workName"
+              name="workName"
+              value={formData.workName}
               onChange={handleChange}
               className="form-input"
               required
@@ -102,110 +132,60 @@ export default function NewCivilWorkPage() {
           </div>
 
           <div>
-            <label htmlFor="description" className="form-label">
-              Description
+            <label htmlFor="contractSignedDate" className="form-label">
+              Contract Signed Date
             </label>
-            <textarea
-              id="description"
-              name="description"
-              value={formData.description}
+            <input
+              type="date"
+              id="contractSignedDate"
+              name="contractSignedDate"
+              value={formData.contractSignedDate}
               onChange={handleChange}
-              rows={4}
-              className="form-textarea"
+              className="form-input"
               required
             />
           </div>
 
           <div>
-            <label htmlFor="status" className="form-label">
-              Status
+            <label htmlFor="contractor" className="form-label">
+              Contractor
             </label>
             <select
-              id="status"
-              name="status"
-              value={formData.status}
+              id="contractor"
+              name="contractor"
+              value={formData.contractor}
               onChange={handleChange}
               className="form-select"
               required
             >
-              <option value="">Select a status</option>
-              <option value="planning">Planning</option>
-              <option value="ongoing">Ongoing</option>
-              <option value="completed">Completed</option>
+              <option value="">Select a contractor</option>
+              {contractors.map((contractor) => (
+                <option key={contractor._id} value={contractor._id}>
+                  {contractor.name}
+                </option>
+              ))}
             </select>
           </div>
 
-          <div>
-            <label htmlFor="startDate" className="form-label">
-              Start Date
-            </label>
-            <input
-              type="date"
-              id="startDate"
-              name="startDate"
-              value={formData.startDate}
-              onChange={handleChange}
-              className="form-input"
-              required
-            />
-          </div>
-
-          <div>
-            <label htmlFor="endDate" className="form-label">
-              End Date
-            </label>
-            <input
-              type="date"
-              id="endDate"
-              name="endDate"
-              value={formData.endDate}
-              onChange={handleChange}
-              className="form-input"
-              required
-            />
-          </div>
-
-          <div>
-            <label htmlFor="location" className="form-label">
-              Location
-            </label>
-            <input
-              type="text"
-              id="location"
-              name="location"
-              value={formData.location}
-              onChange={handleChange}
-              className="form-input"
-              required
-            />
-          </div>
-
-          <div>
-            <label htmlFor="budget" className="form-label">
-              Budget (in INR)
-            </label>
-            <input
-              type="number"
-              id="budget"
-              name="budget"
-              value={formData.budget}
-              onChange={handleChange}
-              className="form-input"
-              required
-            />
-          </div>
-
           {error && (
-            <div className="text-red-500 text-sm">{error}</div>
+            <div className="bg-red-50 text-red-500 p-4 rounded-md">
+              {error}
+            </div>
           )}
 
-          <div className="flex justify-end">
+          <div className="flex justify-end space-x-4">
+            <Link
+              href="/admin/procurement/civil-works"
+              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+            >
+              Cancel
+            </Link>
             <button
               type="submit"
               disabled={loading}
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+              className="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50"
             >
-              {loading ? 'Creating...' : 'Create Civil Work'}
+              {loading ? 'Saving...' : 'Save Civil Work'}
             </button>
           </div>
         </form>
