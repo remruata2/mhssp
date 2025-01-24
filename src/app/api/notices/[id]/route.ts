@@ -1,60 +1,83 @@
 import { NextResponse } from 'next/server';
-import dbConnect from '@/lib/db';
+import dbConnect from '@/lib/mongodb';
 import { Notice } from '@/models/Notice';
-import { writeFile, mkdir } from 'fs/promises';
-import path from 'path';
-import { existsSync } from 'fs';
 
-// Helper function to save PDF file
-async function savePDF(file: File): Promise<string> {
-  const bytes = await file.arrayBuffer();
-  const buffer = Buffer.from(bytes);
-
-  // Create a unique filename
-  const filename = `${Date.now()}-${file.name}`;
-  const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'notices');
-  
-  // Create directory if it doesn't exist
-  if (!existsSync(uploadDir)) {
-    await mkdir(uploadDir, { recursive: true });
-  }
-  
-  const filepath = path.join(uploadDir, filename);
-
-  // Save the file
-  await writeFile(filepath, buffer);
-  return `/uploads/notices/${filename}`;
+interface RouteParams {
+  params: {
+    id: string;
+  };
 }
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function GET(
+  request: Request,
+  context: RouteParams
+) {
   try {
+    const { id } = await Promise.resolve(context.params);
+
+    if (!id) {
+      return NextResponse.json(
+        { success: false, error: 'Notice ID is required' },
+        { status: 400 }
+      );
+    }
+
     await dbConnect();
 
-    const formData = await req.formData();
+    const notice = await Notice.findById(id);
+    if (!notice) {
+      return NextResponse.json(
+        { success: false, error: 'Notice not found' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({ success: true, data: notice });
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'An error occurred';
+    return NextResponse.json(
+      { success: false, error: errorMessage },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(
+  request: Request,
+  context: RouteParams
+) {
+  try {
+    const { id } = await Promise.resolve(context.params);
+
+    if (!id) {
+      return NextResponse.json(
+        { success: false, error: 'Notice ID is required' },
+        { status: 400 }
+      );
+    }
+
+    await dbConnect();
+
+    const formData = await request.formData();
     const title = formData.get('title') as string;
-    const type = formData.get('type') as 'document' | 'url';
-    const category = formData.get('category') as string;
+    const type = formData.get('type') as 'document' | 'url' | 'subNotices';
     const isPublished = formData.get('isPublished') === 'true';
     const publishDate = formData.get('publishDate') as string;
 
     const updateData: any = {
       title,
       type,
-      category,
       isPublished,
       publishDate: new Date(publishDate),
     };
 
-    // Handle document type
     if (type === 'document') {
       const documentFile = formData.get('document') as File | null;
       if (documentFile) {
-        updateData.documentUrl = await savePDF(documentFile);
+        // Handle document file upload here
+        updateData.documentUrl = ''; // Update with actual URL
       }
-    }
-    
-    // Handle URL type
-    if (type === 'url') {
+    } else if (type === 'url') {
       const url = formData.get('url') as string;
       if (url) {
         updateData.url = url;
@@ -62,7 +85,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     }
 
     const notice = await Notice.findByIdAndUpdate(
-      params.id,
+      id,
       updateData,
       { new: true, runValidators: true }
     );
@@ -75,20 +98,32 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     }
 
     return NextResponse.json({ success: true, data: notice });
-  } catch (error) {
-    console.error('Error updating notice:', error);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'An error occurred';
     return NextResponse.json(
-      { success: false, error: 'Failed to update notice' },
+      { success: false, error: errorMessage },
       { status: 500 }
     );
   }
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(
+  request: Request,
+  context: RouteParams
+) {
   try {
+    const { id } = await Promise.resolve(context.params);
+
+    if (!id) {
+      return NextResponse.json(
+        { success: false, error: 'Notice ID is required' },
+        { status: 400 }
+      );
+    }
+
     await dbConnect();
 
-    const notice = await Notice.findByIdAndDelete(params.id);
+    const notice = await Notice.findByIdAndDelete(id);
     if (!notice) {
       return NextResponse.json(
         { success: false, error: 'Notice not found' },
@@ -97,10 +132,10 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
     }
 
     return NextResponse.json({ success: true, data: notice });
-  } catch (error) {
-    console.error('Error deleting notice:', error);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'An error occurred';
     return NextResponse.json(
-      { success: false, error: 'Failed to delete notice' },
+      { success: false, error: errorMessage },
       { status: 500 }
     );
   }

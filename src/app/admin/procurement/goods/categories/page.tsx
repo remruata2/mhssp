@@ -29,7 +29,7 @@ export default function GoodsCategoriesPage() {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch('/api/procurement/goods-categories');
+      const response = await fetch('/api/procurement/goods/categories');
       const data = await response.json();
       if (data.success) {
         setCategories(data.data);
@@ -49,7 +49,7 @@ export default function GoodsCategoriesPage() {
     setError(null);
 
     try {
-      const url = isEditing ? `/api/procurement/goods-categories/${editingId}` : '/api/procurement/goods-categories';
+      const url = isEditing ? `/api/procurement/goods/categories/${editingId}` : '/api/procurement/goods/categories';
       const method = isEditing ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
@@ -83,7 +83,7 @@ export default function GoodsCategoriesPage() {
     }
 
     try {
-      const response = await fetch(`/api/procurement/goods-categories/${id}`, {
+      const response = await fetch(`/api/procurement/goods/categories/${id}`, {
         method: 'DELETE',
       });
 

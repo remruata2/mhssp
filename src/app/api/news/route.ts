@@ -6,10 +6,13 @@ export async function GET() {
   try {
     await dbConnect();
     
-    // Get all news items, sorted by date
-    const news = await News.find()
-      .sort({ publishDate: -1 })
-      .lean();
+    // Get only published news items whose publish date has passed
+    const news = await News.find({
+      isPublished: true,
+      publishDate: { $lte: new Date() }
+    })
+    .sort({ publishDate: -1 })
+    .lean();
 
     return NextResponse.json({ success: true, data: news });
   } catch (error) {

@@ -10,7 +10,7 @@ const noticeSchema = new mongoose.Schema({
   type: {
     type: String,
     required: [true, 'Notice type is required'],
-    enum: ['document', 'url'],
+    enum: ['document', 'url', 'subNotices'],
   },
   documentUrl: {
     type: String,
@@ -50,13 +50,19 @@ const noticeSchema = new mongoose.Schema({
   },
   isPublished: {
     type: Boolean,
-    default: false,
+    default: false
   },
   publishDate: {
     type: Date,
-    required: true,
-    set: (v: string) => new Date(v),
-    get: (v: Date) => v?.toISOString().split('T')[0],
+    required: [true, 'Publish date is required'],
+    set: function(v: string) {
+      // If a date string is provided, convert it to a Date object
+      return new Date(v);
+    },
+    get: function(v: Date) {
+      // Format the date as YYYY-MM-DD when retrieving
+      return v.toISOString().split('T')[0];
+    }
   },
   schemaVersion: {
     type: Number,

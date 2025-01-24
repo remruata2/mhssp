@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import { Notice } from '@/models/Notice';
+import { SubNotice } from '@/models/SubNotice';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
 import { existsSync } from 'fs';
@@ -30,10 +31,13 @@ export async function GET() {
   try {
     await dbConnect();
     
-    // Get all notices, sorted by date
-    const notices = await Notice.find()
-      .sort({ publishDate: -1 })
-      .lean();
+    // Get only published notices and sort by date
+    const notices = await Notice.find({
+      isPublished: true,
+      publishDate: { $lte: new Date() } // Only return notices whose publish date has passed
+    })
+    .sort({ publishDate: -1 })
+    .lean();
 
     return NextResponse.json({ success: true, data: notices });
   } catch (error) {
@@ -51,75 +55,63 @@ export async function POST(req: Request) {
 
     const formData = await req.formData();
     const title = formData.get('title') as string;
-    const type = formData.get('type') as 'document' | 'url';
+    const type = formData.get('type') as string;
     const isPublished = formData.get('isPublished') === 'true';
     const publishDate = formData.get('publishDate') as string;
-    
-    // Validate required fields
-    if (!title || !type || !publishDate) {
-      return NextResponse.json(
-        { success: false, error: 'Missing required fields' },
-        { status: 400 }
-      );
+
+    let documentUrl = '';
+    let url = '';
+
+    // Handle different notice types
+    if (type === 'document') {
+      const pdfFile = formData.get('pdf') as File;
+      if (pdfFile) {
+        documentUrl = await savePDF(pdfFile);
+      } else {
+        documentUrl = formData.get('documentUrl') as string;
+      }
+    } else if (type === 'url') {
+      url = formData.get('url') as string;
     }
 
-    const noticeData: any = {
+    // Create the notice
+    const notice = await Notice.create({
       title,
       type,
-      isPublished: isPublished ? true : false,
-      publishDate: new Date(publishDate),
-    };
-
-    // Handle document type
-    if (type === 'document') {
-      const documentFile = formData.get('pdf') as File;
-      const documentUrl = formData.get('documentUrl') as string;
-
-      // Check if either file or URL is provided
-      if (!documentFile && !documentUrl) {
-        return NextResponse.json(
-          { success: false, error: 'Either document file or document URL is required' },
-          { status: 400 }
-        );
-      }
-
-      // If file is provided, save it and use its path
-      if (documentFile) {
-        noticeData.documentUrl = await savePDF(documentFile);
-      } else {
-        // If URL is provided, use it directly
-        noticeData.documentUrl = documentUrl;
-      }
-    }
-    
-    // Handle URL type
-    if (type === 'url') {
-      const url = formData.get('url') as string;
-      if (!url) {
-        return NextResponse.json(
-          { success: false, error: 'URL is required for URL type notices' },
-          { status: 400 }
-        );
-      }
-      noticeData.url = url;
-    }
-
-    const notice = await Notice.create(noticeData);
-    
-    return NextResponse.json({ 
-      success: true, 
-      message: 'Notice created successfully',
-      data: notice 
+      documentUrl,
+      url,
+      isPublished,
+      publishDate,
     });
 
-  } catch (error: any) {
-    console.error('Error creating notice:', error);
+    // Handle sub notices if type is subNotices
+    if (type === 'subNotices') {
+      const subNoticesData = JSON.parse(formData.get('subNotices') as string);
+      
+      // Create sub notices
+      for (let i = 0; i < subNoticesData.length; i++) {
+        const subNotice = subNoticesData[i];
+        const subNoticeFile = formData.get(`subNoticeFile_${i}`) as File;
+        
+        let subNoticeDocumentUrl = subNotice.documentUrl;
+        
+        // If there's a file, upload it
+        if (subNoticeFile) {
+          subNoticeDocumentUrl = await savePDF(subNoticeFile);
+        }
+        
+        await SubNotice.create({
+          noticeId: notice._id,
+          title: subNotice.title,
+          documentUrl: subNoticeDocumentUrl,
+        });
+      }
+    }
+
+    return NextResponse.json({ success: true, data: notice });
+  } catch (error: unknown) {
     return NextResponse.json(
-      { 
-        success: false, 
-        error: error.message || 'Failed to create notice',
-        details: process.env.NODE_ENV === 'development' ? error : undefined
-      },
+      { success: false, error: error instanceof Error ? error.message : 'An error occurred' },
       { status: 500 }
     );
   }
