@@ -185,28 +185,28 @@ export default function AdminDashboard() {
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Link
-            href="/admin/procurement/contractors/new"
+            href="/admin/procurement/contractors"
             className="group flex items-center justify-center px-4 py-3 bg-white border border-blue-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 hover:-translate-y-1 transform transition-all duration-300"
           >
-            <span className="text-blue-600 group-hover:scale-105 transition-transform duration-300">Add New Contractor</span>
+            <span className="text-blue-600 group-hover:scale-105 transition-transform duration-300">Contractors</span>
           </Link>
           <Link
-            href="/admin/procurement/civil-works/new"
+            href="/admin/procurement/civil-works"
             className="group flex items-center justify-center px-4 py-3 bg-white border border-blue-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 hover:-translate-y-1 transform transition-all duration-300"
           >
-            <span className="text-blue-600 group-hover:scale-105 transition-transform duration-300">Add Civil Work</span>
+            <span className="text-blue-600 group-hover:scale-105 transition-transform duration-300">Civil Work</span>
           </Link>
           <Link
-            href="/admin/procurement/goods/new"
+            href="/admin/procurement/goods"
             className="group flex items-center justify-center px-4 py-3 bg-white border border-blue-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 hover:-translate-y-1 transform transition-all duration-300"
           >
-            <span className="text-blue-600 group-hover:scale-105 transition-transform duration-300">Add Goods</span>
+            <span className="text-blue-600 group-hover:scale-105 transition-transform duration-300">Goods</span>
           </Link>
           <Link
-            href="/admin/procurement/consultancy/new"
+            href="/admin/procurement/consultancy"
             className="group flex items-center justify-center px-4 py-3 bg-white border border-blue-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 hover:-translate-y-1 transform transition-all duration-300"
           >
-            <span className="text-blue-600 group-hover:scale-105 transition-transform duration-300">Add Consultancy</span>
+            <span className="text-blue-600 group-hover:scale-105 transition-transform duration-300">Consultancy</span>
           </Link>
         </div>
       </div>
