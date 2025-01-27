@@ -11,8 +11,8 @@ interface Contractor {
 
 interface CivilWork {
   _id: string;
-  lotNo: number;
-  contractNo: number;
+  lotNo: string;
+  contractNo: string;
   workName: string;
   contractor: string;
   contractSignedDate: string;
@@ -26,8 +26,8 @@ export default function EditCivilWorkPage({ params }: { params: { id: string } }
   const [error, setError] = useState('');
   const [formData, setFormData] = useState<CivilWork>({
     _id: '',
-    lotNo: 0,
-    contractNo: 0,
+    lotNo: '',
+    contractNo: '',
     workName: '',
     contractor: '',
     contractSignedDate: '',
@@ -84,11 +84,7 @@ export default function EditCivilWorkPage({ params }: { params: { id: string } }
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ...formData,
-          lotNo: parseInt(formData.lotNo.toString()),
-          contractNo: parseInt(formData.contractNo.toString()),
-        }),
+        body: JSON.stringify(formData),
       });
 
       const data = await response.json();
@@ -128,11 +124,11 @@ export default function EditCivilWorkPage({ params }: { params: { id: string } }
               Lot No
             </label>
             <input
-              type="number"
+              type="text"
               id="lotNo"
               name="lotNo"
               value={formData.lotNo}
-              onChange={(e) => setFormData({ ...formData, lotNo: parseInt(e.target.value) })}
+              onChange={(e) => setFormData({ ...formData, lotNo: e.target.value })}
               className="form-input"
               required
             />
@@ -143,11 +139,11 @@ export default function EditCivilWorkPage({ params }: { params: { id: string } }
               Contract No
             </label>
             <input
-              type="number"
+              type="text"
               id="contractNo"
               name="contractNo"
               value={formData.contractNo}
-              onChange={(e) => setFormData({ ...formData, contractNo: parseInt(e.target.value) })}
+              onChange={(e) => setFormData({ ...formData, contractNo: e.target.value })}
               className="form-input"
               required
             />

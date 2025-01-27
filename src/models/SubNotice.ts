@@ -4,6 +4,7 @@ export interface ISubNotice extends Document {
   noticeId: mongoose.Types.ObjectId;
   title: string;
   documentUrl: string;
+  order: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -24,12 +25,16 @@ const SubNoticeSchema = new Schema({
     required: true,
     trim: true,
   },
+  order: {
+    type: Number,
+    required: true,
+  },
 }, {
   timestamps: true,
 });
 
 // Create indexes
-SubNoticeSchema.index({ noticeId: 1 });
+SubNoticeSchema.index({ noticeId: 1, order: 1 });
 SubNoticeSchema.index({ createdAt: -1 });
 
 // Add any virtual fields if needed

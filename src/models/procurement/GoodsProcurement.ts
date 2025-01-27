@@ -1,85 +1,65 @@
-import mongoose, { Document } from 'mongoose';
-import { IContractor } from './Contractor';
-import { IGoodsCategory } from './GoodsCategory';
+import { Schema, model, models, Document } from 'mongoose';
 
-export interface IGoodsProcurement extends Document {
-  referenceNo: number;
-  goodsCategory: mongoose.Types.ObjectId | IGoodsCategory;
-  itemName: string;
-  quantity: number;
-  contractSignedDate: Date;
-  contractor: mongoose.Types.ObjectId | IContractor;
-  createdAt: Date;
-  updatedAt: Date;
-  // Virtual fields
-  formattedDate: string;
-  isExpired: boolean;
-  daysSinceCreation: number;
-  totalValue: number;
+// Clear any existing model to prevent stale schema
+if (models.GoodsProcurement) {
+  delete models.GoodsProcurement;
 }
 
-const goodsProcurementSchema = new mongoose.Schema<IGoodsProcurement>(
+export interface IGoodsProcurement extends Document {
+  referenceNo: string;
+  goodsCategory: Schema.Types.ObjectId;
+  goodsName: string;
+  quantity: number;
+  contractSignedDate: Date;
+  contractor: Schema.Types.ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const goodsProcurementSchema = new Schema<IGoodsProcurement>(
   {
-    referenceNo: { 
-      type: Number, 
-      required: [true, 'Please provide a reference number'],
+    referenceNo: {
+      type: String,
+      required: [true, 'Reference number is required'],
+      trim: true,
       unique: true,
-      index: true,
-      validate: {
-        validator: Number.isInteger,
-        message: 'Reference number must be an integer'
-      }
     },
     goodsCategory: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: 'GoodsCategory',
-      required: [true, 'Please specify a goods category'],
+      required: [true, 'Goods category is required'],
     },
-    itemName: { 
-      type: String, 
-      required: [true, 'Please provide an item name'],
+    goodsName: {
+      type: String,
+      required: [true, 'Goods name is required'],
       trim: true,
-      minlength: [3, 'Item name must be at least 3 characters long'],
-      maxlength: [100, 'Item name cannot exceed 100 characters']
     },
-    quantity: { 
-      type: Number, 
-      required: [true, 'Please specify quantity'],
-      min: [1, 'Quantity must be at least 1'],
-      validate: {
-        validator: Number.isInteger,
-        message: 'Quantity must be a whole number'
-      }
+    quantity: {
+      type: Number,
+      required: [true, 'Quantity is required'],
+      min: [0, 'Quantity cannot be negative'],
     },
-    unitPrice: { 
-      type: Number, 
-      required: [true, 'Please specify unit price'],
-      min: [0, 'Unit price must be at least 0'],
-      validate: {
-        validator: Number.isFinite,
-        message: 'Unit price must be a number'
-      }
-    },
-    contractSignedDate: { 
-      type: Date, 
-      required: [true, 'Please provide contract signed date'],
-      validate: {
-        validator: function(value: Date) {
-          return value <= new Date();
-        },
-        message: 'Contract signed date cannot be in the future'
-      }
+    contractSignedDate: {
+      type: Date,
+      required: [true, 'Contract signed date is required'],
     },
     contractor: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: 'Contractor',
-      required: [true, 'Please specify a contractor'],
+      required: [true, 'Contractor is required'],
     },
   },
-  { 
+  {
     timestamps: true,
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true }
+    toJSON: {
+      virtuals: true,
+      transform: function (doc, ret) {
+        ret.id = ret._id;
+        delete ret._id;
+        delete ret.__v;
+        return ret;
+      },
+    },
   }
 );
 
@@ -89,44 +69,12 @@ goodsProcurementSchema.index({ goodsCategory: 1 });
 goodsProcurementSchema.index({ contractor: 1 });
 
 // Virtual for formatted date
-goodsProcurementSchema.virtual('formattedDate').get(function() {
+goodsProcurementSchema.virtual('formattedContractSignedDate').get(function (this: IGoodsProcurement) {
   return this.contractSignedDate.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
-    day: 'numeric'
+    day: 'numeric',
   });
 });
 
-// Virtual to check if contract is older than 1 year
-goodsProcurementSchema.virtual('isExpired').get(function() {
-  const oneYearAgo = new Date();
-  oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-  return this.contractSignedDate < oneYearAgo;
-});
-
-// Virtual for days since creation
-goodsProcurementSchema.virtual('daysSinceCreation').get(function() {
-  const diffTime = Math.abs(new Date().getTime() - this.createdAt.getTime());
-  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-});
-
-// Virtual for total value
-goodsProcurementSchema.virtual('totalValue').get(function() {
-  return this.quantity * this.unitPrice;
-});
-
-// Pre-save middleware
-goodsProcurementSchema.pre('save', function(next) {
-  if (this.contractSignedDate > new Date()) {
-    next(new Error('Contract signed date cannot be in the future'));
-    return;
-  }
-  if (this.unitPrice < 0) {
-    next(new Error('Unit price cannot be negative'));
-    return;
-  }
-  next();
-});
-
-export default mongoose.models.GoodsProcurement ||
-  mongoose.model<IGoodsProcurement>('GoodsProcurement', goodsProcurementSchema);
+export default model<IGoodsProcurement>('GoodsProcurement', goodsProcurementSchema);

@@ -13,8 +13,8 @@ interface Contractor {
 
 interface CivilWorksProcurement {
   _id: string;
-  lotNo: number;
-  contractNo: number;
+  lotNo: string;
+  contractNo: string;
   workName: string;
   contractSignedDate: string;
   contractor: Contractor;
@@ -88,6 +88,19 @@ export default function CivilWorksPage() {
         return;
       }
 
+      // Validate lotNo and contractNo
+      if (!formData.lotNo.trim()) {
+        setError('Lot Number is required');
+        setLoading(false);
+        return;
+      }
+
+      if (!formData.contractNo.trim()) {
+        setError('Contract Number is required');
+        setLoading(false);
+        return;
+      }
+
       const civilWorksData = {
         ...formData,
         contractor: selectedContractor._id,
@@ -144,7 +157,7 @@ export default function CivilWorksPage() {
   const handleEdit = (item: CivilWorksProcurement) => {
     setFormData({
       lotNo: item.lotNo.toString(),
-      contractNo: item.contractNo.toString(),
+      contractNo: item.contractNo,
       workName: item.workName,
       contractSignedDate: new Date(item.contractSignedDate).toISOString().split('T')[0],
       contractor: item.contractor._id,
@@ -185,7 +198,7 @@ export default function CivilWorksPage() {
     const searchString = searchTerm.toLowerCase();
     return (
       item.lotNo.toString().includes(searchString) ||
-      item.contractNo.toString().includes(searchString) ||
+      item.contractNo.toLowerCase().includes(searchString) ||
       item.workName.toLowerCase().includes(searchString) ||
       item.contractor?.name.toLowerCase().includes(searchString)
     );
@@ -313,7 +326,7 @@ export default function CivilWorksPage() {
               Lot No <span className="text-red-500">*</span>
             </label>
             <input
-              type="number"
+              type="text"
               id="lotNo"
               name="lotNo"
               value={formData.lotNo}
@@ -323,13 +336,12 @@ export default function CivilWorksPage() {
             />
           </div>
 
-          <div>
-            <label htmlFor="contractNo" className="form-label">
-              Contract No <span className="text-red-500">*</span>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700">
+              Contract Number
             </label>
             <input
-              type="number"
-              id="contractNo"
+              type="text"
               name="contractNo"
               value={formData.contractNo}
               onChange={handleChange}

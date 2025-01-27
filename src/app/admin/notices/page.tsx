@@ -3,34 +3,27 @@
 import { useState, useEffect } from 'react';
 import { FaFilePdf, FaEdit, FaTrash, FaPlus, FaCalendar, FaUpload, FaLink } from 'react-icons/fa';
 import SlideOver from '@/components/SlideOver';
+import { Notice, SubNoticeFormData } from '@/types/notice';
 
-interface Notice {
-  _id: string;
+interface FormData {
   title: string;
   type: 'document' | 'url' | 'subNotices';
-  documentUrl: string;
-  url: string;
-  category: string;
-  publishDate: string;
+  documentUrl?: string;
+  url?: string;
   isPublished: boolean;
-  createdAt: string;
+  publishDate: string;
 }
 
-interface SubNotice {
-  _id: string;
-  noticeId: string;
-  title: string;
-  documentUrl: string;
-  createdAt: string;
-}
+const initialFormData: FormData = {
+  title: '',
+  type: 'document',
+  documentUrl: '',
+  url: '',
+  isPublished: false,
+  publishDate: new Date().toISOString().split('T')[0],
+};
 
-interface SubNoticeFormData {
-  title: string;
-  documentUrl: string;
-  file: File | null;
-}
-
-const NoticesPage = () => {
+export default function NoticesPage() {
   const [notices, setNotices] = useState<Notice[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,24 +31,17 @@ const NoticesPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState('');
+  const [formData, setFormData] = useState<FormData>(initialFormData);
   const [subNoticesFormData, setSubNoticesFormData] = useState<SubNoticeFormData[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [dateFilter, setDateFilter] = useState('');
   const [filteredNotices, setFilteredNotices] = useState<Notice[]>([]);
-
-  const [formData, setFormData] = useState({
-    title: '',
-    type: 'document',
-    url: '',
-    publishDate: new Date().toISOString().split('T')[0],
-  });
-
   const [pdfFile, setPdfFile] = useState<File | null>(null);
 
   const addSubNoticeField = () => {
     setSubNoticesFormData([
       ...subNoticesFormData,
-      { title: '', documentUrl: '', file: null }
+      { id: '', title: '', documentUrl: '', file: null }
     ]);
   };
 
@@ -123,38 +109,52 @@ const NoticesPage = () => {
     filterNotices();
   }, [notices, searchQuery, dateFilter]);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value, type } = e.target;
+  const handleEdit = (notice: Notice) => {
+    setIsEditing(true);
+    setEditingId(notice._id);
     
-    if (type === 'checkbox') {
-      const checkbox = e.target as HTMLInputElement;
-      setFormData({
-        ...formData,
-        [name]: checkbox.checked,
-      });
-    } else {
-      setFormData({
-        ...formData,
-        [name]: value,
-      });
+    // Format the date to YYYY-MM-DD for the input field
+    const formattedDate = new Date(notice.publishDate).toISOString().split('T')[0];
+    
+    setFormData({
+      title: notice.title,
+      type: notice.type,
+      documentUrl: notice.documentUrl || '',
+      url: notice.url || '',
+      isPublished: notice.isPublished,
+      publishDate: formattedDate,
+    });
 
-      // Clear file and URLs when changing type
-      if (name === 'type') {
-        setPdfFile(null);
-        if (value !== 'subNotices') {
+    // Initialize subNoticesFormData when editing
+    if (notice.type === 'subNotices') {
+      fetch(`/api/notices/${notice._id}/subnotices`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            // Sort subNotices by order field
+            const sortedSubNotices = [...data.data].sort(
+              (a: SubNotice, b: SubNotice) => a.order - b.order
+            );
+            
+            setSubNoticesFormData(
+              sortedSubNotices.map((subNotice: SubNotice) => ({
+                id: subNotice._id,
+                title: subNotice.title,
+                documentUrl: subNotice.documentUrl,
+                file: null
+              }))
+            );
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching sub notices:', error);
           setSubNoticesFormData([]);
-        }
-        if (value === 'document') {
-          setFormData(prev => ({ ...prev, url: '' }));
-        } else if (value === 'url') {
-          setFormData(prev => ({ ...prev, documentUrl: '' }));
-        } else {
-          setFormData(prev => ({ ...prev, documentUrl: '', url: '' }));
-        }
-      }
+        });
+    } else {
+      setSubNoticesFormData([]);
     }
+
+    setIsModalOpen(true);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -173,59 +173,68 @@ const NoticesPage = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value, type } = e.target;
+    
+    if (type === 'checkbox') {
+      const checkbox = e.target as HTMLInputElement;
+      setFormData(prev => ({
+        ...prev,
+        [name]: checkbox.checked,
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value,
+      }));
+
+      // Clear file and URLs when changing type
+      if (name === 'type') {
+        setPdfFile(null);
+        if (value !== 'subNotices') {
+          setSubNoticesFormData([]);
+        }
+        if (value === 'document') {
+          setFormData(prev => ({ ...prev, url: '' }));
+        } else if (value === 'url') {
+          setFormData(prev => ({ ...prev, documentUrl: '' }));
+        } else {
+          setFormData(prev => ({ ...prev, documentUrl: '', url: '' }));
+        }
+      }
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     setError(null);
+    setSuccessMessage(null);
+    setIsLoading(true);
 
     try {
-      // Validate form data
+      // Validate required fields
       if (!formData.title) {
         throw new Error('Please enter a title');
       }
 
+      // Ensure subNoticesFormData is initialized
+      const currentSubNotices = subNoticesFormData || [];
+
+      // Validate based on type
       if (formData.type === 'document') {
-        if (!pdfFile && !formData.documentUrl) {
-          throw new Error('Please provide either a document URL or upload a PDF file');
-        }
-        if (formData.documentUrl) {
-          const isValidUrl = (
-            formData.documentUrl.startsWith('/') ||
-            formData.documentUrl.match(/docs\.google\.com.*\/forms\/.*\/viewform/i) ||
-            formData.documentUrl.match(/drive\.google\.com.*\/file\/d\/.*\/view/i) ||
-            formData.documentUrl.match(/docs\.google\.com.*\/document\/d\/.*\/edit/i) ||
-            (() => { try { new URL(formData.documentUrl); return true; } catch { return false; } })()
-          );
-          if (!isValidUrl) {
-            throw new Error('Please enter a valid document URL (can be a local path starting with / or a full URL)');
+        if (!isEditing) {
+          if (!pdfFile) {
+            throw new Error('Please upload a PDF file');
           }
+        } else if (!formData.documentUrl && !pdfFile) {
+          throw new Error('Please either provide a document URL or upload a PDF file');
         }
       } else if (formData.type === 'url' && !formData.url) {
         throw new Error('Please enter a URL');
-      } else if (formData.type === 'subNotices' && subNoticesFormData.length === 0) {
+      } else if (formData.type === 'subNotices' && currentSubNotices.length === 0) {
         throw new Error('Please add at least one sub notice');
-      }
-
-      // Validate sub notices if type is subNotices
-      if (formData.type === 'subNotices') {
-        for (const [index, subNotice] of subNoticesFormData.entries()) {
-          if (!subNotice.title) {
-            throw new Error(`Please enter a title for sub notice ${index + 1}`);
-          }
-          if (!subNotice.file && !subNotice.documentUrl) {
-            throw new Error(`Please provide either a document URL or upload a PDF file for sub notice ${index + 1}`);
-          }
-          if (subNotice.documentUrl) {
-            const isValidUrl = (
-              subNotice.documentUrl.startsWith('/') ||
-              subNotice.documentUrl.match(/docs\.google\.com.*\/forms\/.*\/viewform/i) ||
-              (() => { try { new URL(subNotice.documentUrl); return true; } catch { return false; } })()
-            );
-            if (!isValidUrl) {
-              throw new Error(`Please enter a valid URL for sub notice ${index + 1} (can be a local path starting with / or a full URL)`);
-            }
-          }
-        }
       }
 
       const formDataToSend = new FormData();
@@ -236,26 +245,24 @@ const NoticesPage = () => {
 
       if (formData.type === 'document') {
         if (pdfFile) {
-          formDataToSend.append('pdf', pdfFile);
-        }
-        if (formData.documentUrl) {
+          formDataToSend.append('document', pdfFile);
+        } else if (formData.documentUrl) {
           formDataToSend.append('documentUrl', formData.documentUrl);
         }
-      } else if (formData.type === 'url') {
+      } else if (formData.type === 'url' && formData.url) {
         formDataToSend.append('url', formData.url);
-      } else if (formData.type === 'subNotices') {
-        // Add sub notices data
-        formDataToSend.append('subNotices', JSON.stringify(
-          subNoticesFormData.map(sp => ({
-            title: sp.title,
-            documentUrl: sp.documentUrl
-          }))
-        ));
-        
-        // Add sub notice files
-        subNoticesFormData.forEach((sp, index) => {
-          if (sp.file) {
-            formDataToSend.append(`subNoticeFile_${index}`, sp.file);
+      }
+
+      // Handle sub notices
+      if (formData.type === 'subNotices' && currentSubNotices.length > 0) {
+        currentSubNotices.forEach((subNotice, index) => {
+          formDataToSend.append(`subNotices[${index}][id]`, subNotice.id);
+          formDataToSend.append(`subNotices[${index}][title]`, subNotice.title);
+          if (subNotice.file) {
+            formDataToSend.append(`subNotices[${index}][file]`, subNotice.file);
+          }
+          if (subNotice.documentUrl) {
+            formDataToSend.append(`subNotices[${index}][documentUrl]`, subNotice.documentUrl);
           }
         });
       }
@@ -275,14 +282,9 @@ const NoticesPage = () => {
       }
 
       setSuccessMessage(isEditing ? 'Notice updated successfully!' : 'Notice added successfully!');
-      setFormData({
-        title: '',
-        type: 'document',
-        url: '',
-        publishDate: new Date().toISOString().split('T')[0],
-      });
+      setFormData(initialFormData);
       setPdfFile(null);
-      setSubNoticesFormData([]); // Clear sub notices
+      setSubNoticesFormData([]);
       setIsEditing(false);
       setEditingId('');
       fetchNotices();
@@ -293,49 +295,6 @@ const NoticesPage = () => {
       console.error('Error submitting notice:', err);
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleEdit = async (notice: Notice) => {
-    const formattedDate = notice.publishDate 
-      ? new Date(notice.publishDate).toISOString().split('T')[0]
-      : new Date().toISOString().split('T')[0];
-
-    setFormData({
-      title: notice.title,
-      type: notice.type,
-      url: notice.url || '',
-      publishDate: formattedDate,
-    });
-    setIsEditing(true);
-    setEditingId(notice._id);
-    setIsModalOpen(true);
-
-    if (notice.type === 'subNotices') {
-      try {
-        const response = await fetch(`/api/notices/${notice._id}/subnotices`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch sub notices');
-        }
-        const data = await response.json();
-        if (data.success) {
-          const formattedSubNotices = data.data.map((sp: any) => ({
-            title: sp.title,
-            documentUrl: sp.documentUrl,
-            file: null
-          }));
-          setSubNoticesFormData(formattedSubNotices);
-        } else {
-          setError(data.error || 'Error fetching sub notices');
-          console.error('Error fetching sub notices:', data);
-        }
-      } catch (error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-        setError(errorMessage);
-        console.error('Error fetching sub notices:', errorMessage);
-      }
-    } else {
-      setSubNoticesFormData([]);
     }
   };
 
@@ -367,12 +326,7 @@ const NoticesPage = () => {
   };
 
   const resetForm = () => {
-    setFormData({
-      title: '',
-      type: 'document',
-      url: '',
-      publishDate: new Date().toISOString().split('T')[0],
-    });
+    setFormData(initialFormData);
     setPdfFile(null);
     setIsEditing(false);
     setEditingId('');
@@ -705,7 +659,7 @@ const NoticesPage = () => {
 
                   {subNoticesFormData.length === 0 ? (
                     <p className="text-gray-500 text-center py-4">
-                      Click "Add Sub Notice" to add documents to this notice.
+                      Click `&quot;Add Sub Notice&quot; to add documents to this notice.
                     </p>
                   ) : (
                     <div className="space-y-6">
@@ -843,5 +797,3 @@ const NoticesPage = () => {
     </div>
   );
 }
-
-export default NoticesPage;

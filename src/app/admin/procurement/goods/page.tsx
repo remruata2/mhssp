@@ -18,9 +18,9 @@ interface GoodsCategory {
 
 interface GoodsProcurement {
   _id: string;
-  referenceNo: number;
+  referenceNo: string;
   goodsCategory: GoodsCategory;
-  itemName: string;
+  goodsName: string;
   quantity: number;
   contractSignedDate: string;
   contractor: Contractor;
@@ -41,7 +41,7 @@ export default function GoodsPage() {
   const [formData, setFormData] = useState({
     referenceNo: '',
     goodsCategory: '',
-    itemName: '',
+    goodsName: '',
     quantity: '',
     contractSignedDate: '',
     contractor: '',
@@ -69,10 +69,12 @@ export default function GoodsPage() {
 
   async function fetchCategories() {
     try {
-      const response = await fetch('/api/procurement/goods-categories');
+      const response = await fetch('/api/procurement/goods/categories');
       const data = await response.json();
       if (data.success) {
         setCategories(data.data);
+      } else {
+        console.error('Failed to fetch categories:', data.error);
       }
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -103,6 +105,17 @@ export default function GoodsPage() {
     setError('');
 
     try {
+      // Check if reference number already exists
+      if (!isEditing) {
+        const response = await fetch(`/api/procurement/goods/check-reference?referenceNo=${formData.referenceNo}`);
+        const data = await response.json();
+        if (!data.success) {
+          setError('Reference number already exists');
+          setLoading(false);
+          return;
+        }
+      }
+
       const selectedContractor = contractors.find(c => c._id === formData.contractor);
       const selectedCategory = categories.find(c => c._id === formData.goodsCategory);
       
@@ -118,10 +131,24 @@ export default function GoodsPage() {
         return;
       }
 
+      // Validate required fields
+      if (!formData.goodsName.trim()) {
+        setError('Goods name is required');
+        setLoading(false);
+        return;
+      }
+
+      if (!formData.quantity || Number(formData.quantity) < 0) {
+        setError('Quantity must be a positive number');
+        setLoading(false);
+        return;
+      }
+
       const goodsData = {
         ...formData,
         contractor: selectedContractor._id,
         goodsCategory: selectedCategory._id,
+        quantity: Number(formData.quantity)
       };
 
       const url = isEditing ? `/api/procurement/goods/${editingId}` : '/api/procurement/goods';
@@ -176,7 +203,7 @@ export default function GoodsPage() {
     setFormData({
       referenceNo: item.referenceNo.toString(),
       goodsCategory: item.goodsCategory._id,
-      itemName: item.itemName,
+      goodsName: item.goodsName,
       quantity: item.quantity.toString(),
       contractSignedDate: new Date(item.contractSignedDate).toISOString().split('T')[0],
       contractor: item.contractor._id,
@@ -203,7 +230,7 @@ export default function GoodsPage() {
     setFormData({
       referenceNo: '',
       goodsCategory: '',
-      itemName: '',
+      goodsName: '',
       quantity: '',
       contractSignedDate: '',
       contractor: '',
@@ -218,7 +245,7 @@ export default function GoodsPage() {
     const searchString = searchTerm.toLowerCase();
     return (
       item.referenceNo.toString().includes(searchString) ||
-      item.itemName.toLowerCase().includes(searchString) ||
+      item.goodsName.toLowerCase().includes(searchString) ||
       item.goodsCategory?.name.toLowerCase().includes(searchString) ||
       item.contractor?.name.toLowerCase().includes(searchString)
     );
@@ -265,7 +292,7 @@ export default function GoodsPage() {
       <SearchAndFilter
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
-        placeholder="Search by reference no, item name, category, or contractor..."
+        placeholder="Search by reference no, goods name, category, or contractor..."
       />
 
       <div className="bg-white shadow-md rounded-lg overflow-hidden mt-4">
@@ -276,7 +303,7 @@ export default function GoodsPage() {
                 Reference No
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Item Name
+                Goods Name
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Category
@@ -299,7 +326,7 @@ export default function GoodsPage() {
             {currentGoods.map((item) => (
               <tr key={item._id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">{item.referenceNo}</td>
-                <td className="px-6 py-4">{item.itemName}</td>
+                <td className="px-6 py-4">{item.goodsName}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{item.goodsCategory?.name}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{item.quantity}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -350,7 +377,7 @@ export default function GoodsPage() {
               Reference No <span className="text-red-500">*</span>
             </label>
             <input
-              type="number"
+              type="text"
               id="referenceNo"
               name="referenceNo"
               value={formData.referenceNo}
@@ -382,14 +409,14 @@ export default function GoodsPage() {
           </div>
 
           <div>
-            <label htmlFor="itemName" className="form-label">
-              Item Name <span className="text-red-500">*</span>
+            <label htmlFor="goodsName" className="form-label">
+              Goods Name <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
-              id="itemName"
-              name="itemName"
-              value={formData.itemName}
+              id="goodsName"
+              name="goodsName"
+              value={formData.goodsName}
               onChange={handleChange}
               className="form-input"
               required

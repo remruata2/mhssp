@@ -1,9 +1,9 @@
-import mongoose from 'mongoose';
-import { IContractor } from './Contractor';
+import mongoose from "mongoose";
+import { IContractor } from "./Contractor";
 
 export interface ICivilWorksProcurement {
-  lotNo: number;
-  contractNo: number;
+  lotNo: string;
+  contractNo: string;
   workName: string;
   contractSignedDate: Date;
   contractor: mongoose.Types.ObjectId | IContractor;
@@ -13,13 +13,13 @@ export interface ICivilWorksProcurement {
 
 const civilWorksProcurementSchema = new mongoose.Schema<ICivilWorksProcurement>(
   {
-    lotNo: { type: Number, required: true },
-    contractNo: { type: Number, required: true },
+    lotNo: { type: String, required: true },
+    contractNo: { type: String, required: true },
     workName: { type: String, required: true },
     contractSignedDate: { type: Date, required: true },
     contractor: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Contractor',
+      ref: "Contractor",
       required: true,
     },
   },
@@ -27,4 +27,7 @@ const civilWorksProcurementSchema = new mongoose.Schema<ICivilWorksProcurement>(
 );
 
 export default mongoose.models.CivilWorksProcurement ||
-  mongoose.model<ICivilWorksProcurement>('CivilWorksProcurement', civilWorksProcurementSchema);
+  mongoose.model<ICivilWorksProcurement>(
+    "CivilWorksProcurement",
+    civilWorksProcurementSchema
+  );

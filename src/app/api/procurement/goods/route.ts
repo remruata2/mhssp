@@ -11,7 +11,7 @@ export async function GET() {
       .populate('goodsCategory', 'name')
       .populate('contractor', 'name')
       .sort({ createdAt: -1 })
-      .select('referenceNo itemName quantity contractSignedDate contractor goodsCategory createdAt')
+      .select('referenceNo goodsName quantity contractSignedDate contractor goodsCategory createdAt')
       .lean();
 
     return NextResponse.json({ success: true, data: goods });
@@ -33,9 +33,10 @@ export async function POST(req: Request) {
     const data = await req.json();
     
     const goods = await GoodsProcurement.create(data);
-    const populatedGoods = await goods
+    const populatedGoods = await GoodsProcurement.findById(goods._id)
       .populate('goodsCategory', 'name')
-      .populate('contractor', 'name');
+      .populate('contractor', 'name')
+      .lean();
 
     return NextResponse.json({ success: true, data: populatedGoods }, { status: 201 });
   } catch (error) {
@@ -52,7 +53,7 @@ export async function POST(req: Request) {
     return NextResponse.json(
       { 
         success: false, 
-        error: error instanceof Error ? error.message : 'Failed to create goods'
+        error: error instanceof Error ? error.message : 'Failed to create goods' 
       },
       { status: 400 }
     );

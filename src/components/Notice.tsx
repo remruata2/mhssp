@@ -1,24 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { FaFilePdf, FaDownload, FaCalendarAlt, FaLink, FaChevronRight } from 'react-icons/fa';
-
-interface SubNotice {
-  _id: string;
-  title: string;
-  documentUrl: string;
-}
-
-interface Notice {
-  _id: string;
-  title: string;
-  publishDate: string;
-  type: 'document' | 'url' | 'subNotices';
-  documentUrl?: string;
-  url?: string;
-  isPublished: boolean;
-}
+import { FaFilePdf, FaCalendarAlt, FaLink, FaChevronRight } from 'react-icons/fa';
+import { Notice, SubNotice } from '@/types/notice';
 
 interface NoticeProps {
   notice: Notice;
@@ -33,16 +17,18 @@ const SubNoticesList = ({ noticeId }: { noticeId: string }) => {
     const fetchSubNotices = async () => {
       try {
         const response = await fetch(`/api/notices/${noticeId}/subnotices`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch sub notices');
+        }
         const data = await response.json();
         if (data.success) {
-          setSubNotices(data.data || []);
+          setSubNotices(data.data);
         } else {
-          setError(data.error || 'Failed to fetch sub notices');
+          setError(data.error || 'Error fetching sub notices');
         }
-      } catch (err: unknown) {
-        const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'An error occurred';
         setError(errorMessage);
-        console.error('Error fetching sub notices:', errorMessage);
       } finally {
         setLoading(false);
       }
@@ -73,18 +59,23 @@ const SubNoticesList = ({ noticeId }: { noticeId: string }) => {
   );
 };
 
-const NoticeBoard = ({ notice }: NoticeProps) => {
+export default function NoticeComponent({ notice }: NoticeProps) {
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
+
   return (
     <div className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow">
       <h3 className="text-lg font-semibold text-gray-800 mb-2">{notice.title}</h3>
       
       <div className="flex items-center text-sm text-gray-600 mb-4">
         <FaCalendarAlt className="mr-2" />
-        {new Date(notice.publishDate).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric'
-        })}
+        {formatDate(notice.publishDate)}
       </div>
 
       {notice.type === 'subNotices' ? (
@@ -112,5 +103,3 @@ const NoticeBoard = ({ notice }: NoticeProps) => {
     </div>
   );
 };
-
-export default NoticeBoard;

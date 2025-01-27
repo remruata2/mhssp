@@ -25,7 +25,7 @@ export async function GET(
     await dbConnect();
 
     const subNotices = await SubNotice.find({ noticeId: id })
-      .sort({ createdAt: -1 });
+      .sort({ order: 1 }); // Sort by order ascending
 
     return NextResponse.json({ success: true, data: subNotices });
   } catch (error: unknown) {

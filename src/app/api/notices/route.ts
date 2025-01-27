@@ -64,11 +64,9 @@ export async function POST(req: Request) {
 
     // Handle different notice types
     if (type === 'document') {
-      const pdfFile = formData.get('pdf') as File;
+      const pdfFile = formData.get('document') as File;
       if (pdfFile) {
         documentUrl = await savePDF(pdfFile);
-      } else {
-        documentUrl = formData.get('documentUrl') as string;
       }
     } else if (type === 'url') {
       url = formData.get('url') as string;
@@ -86,32 +84,41 @@ export async function POST(req: Request) {
 
     // Handle sub notices if type is subNotices
     if (type === 'subNotices') {
-      const subNoticesData = JSON.parse(formData.get('subNotices') as string);
+      const subNotices = [];
+      let index = 0;
       
-      // Create sub notices
-      for (let i = 0; i < subNoticesData.length; i++) {
-        const subNotice = subNoticesData[i];
-        const subNoticeFile = formData.get(`subNoticeFile_${i}`) as File;
-        
-        let subNoticeDocumentUrl = subNotice.documentUrl;
-        
+      // Keep checking for sub notices until we don't find any more
+      while (formData.has(`subNotices[${index}][title]`)) {
+        const title = formData.get(`subNotices[${index}][title]`) as string;
+        const file = formData.get(`subNotices[${index}][file]`) as File;
+        let documentUrl = formData.get(`subNotices[${index}][documentUrl]`) as string;
+
         // If there's a file, upload it
-        if (subNoticeFile) {
-          subNoticeDocumentUrl = await savePDF(subNoticeFile);
+        if (file) {
+          documentUrl = await savePDF(file);
         }
-        
-        await SubNotice.create({
+
+        subNotices.push({
+          title,
+          documentUrl,
           noticeId: notice._id,
-          title: subNotice.title,
-          documentUrl: subNoticeDocumentUrl,
+          order: index
         });
+
+        index++;
+      }
+
+      // Create all sub notices
+      if (subNotices.length > 0) {
+        await SubNotice.create(subNotices);
       }
     }
 
-    return NextResponse.json({ success: true, data: notice });
-  } catch (error: unknown) {
+    return NextResponse.json({ success: true, data: notice }, { status: 201 });
+  } catch (error: any) {
+    console.error('Error creating notice:', error);
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : 'An error occurred' },
+      { success: false, error: error.message || 'Failed to create notice' },
       { status: 500 }
     );
   }

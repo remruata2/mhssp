@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface Contractor {
   _id: string;
@@ -13,13 +13,13 @@ export default function NewCivilWorkPage() {
   const router = useRouter();
   const [contractors, setContractors] = useState<Contractor[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [formData, setFormData] = useState({
-    lotNo: '',
-    contractNo: '',
-    workName: '',
-    contractSignedDate: '',
-    contractor: '',
+    lotNo: "",
+    contractNo: "",
+    workName: "",
+    contractSignedDate: "",
+    contractor: "",
   });
 
   useEffect(() => {
@@ -28,45 +28,49 @@ export default function NewCivilWorkPage() {
 
   async function fetchContractors() {
     try {
-      const response = await fetch('/api/procurement/contractors');
+      const response = await fetch("/api/procurement/contractors");
       const data = await response.json();
       if (data.success) {
         setContractors(data.data);
       }
     } catch (error) {
-      console.error('Error fetching contractors:', error);
+      console.error("Error fetching contractors:", error);
     }
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
-      const response = await fetch('/api/procurement/civil-works', {
-        method: 'POST',
+      const response = await fetch("/api/procurement/civil-works", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
       });
 
       const data = await response.json();
-      
+
       if (data.success) {
-        router.push('/admin/procurement/civil-works');
+        router.push("/admin/procurement/civil-works");
       } else {
         setError(data.error);
       }
     } catch (error) {
-      setError('Failed to create civil work');
+      setError("Failed to create civil work");
     } finally {
       setLoading(false);
     }
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -89,7 +93,7 @@ export default function NewCivilWorkPage() {
               Lot No
             </label>
             <input
-              type="number"
+              type="text"
               id="lotNo"
               name="lotNo"
               value={formData.lotNo}
@@ -105,7 +109,7 @@ export default function NewCivilWorkPage() {
               Contract No
             </label>
             <input
-              type="number"
+              type="text"
               id="contractNo"
               name="contractNo"
               value={formData.contractNo}
@@ -168,9 +172,7 @@ export default function NewCivilWorkPage() {
           </div>
 
           {error && (
-            <div className="bg-red-50 text-red-500 p-4 rounded-md">
-              {error}
-            </div>
+            <div className="bg-red-50 text-red-500 p-4 rounded-md">{error}</div>
           )}
 
           <div className="flex justify-end space-x-4">
@@ -185,7 +187,7 @@ export default function NewCivilWorkPage() {
               disabled={loading}
               className="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50"
             >
-              {loading ? 'Saving...' : 'Save Civil Work'}
+              {loading ? "Saving..." : "Save Civil Work"}
             </button>
           </div>
         </form>

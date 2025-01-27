@@ -1,16 +1,17 @@
 'use client';
 
-import NoticeBoard from '@/components/Notice';
-import { motion } from 'framer-motion';
-import PageTitle from '@/components/ui/PageTitle';
 import { useState, useEffect } from 'react';
+import { Notice } from '@/types/notice';
+import NoticeComponent from '@/components/Notice';
+import PageTitle from '@/components/ui/PageTitle';
+import { motion } from 'framer-motion';
 
-export default function NoticeBoardPage() {
+export default function NoticesPage() {
   const [notices, setNotices] = useState<Notice[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filteredNotices, setFilteredNotices] = useState<Notice[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [dateFilter, setDateFilter] = useState('');
-  const [filteredNotices, setFilteredNotices] = useState<Notice[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchNotices = async () => {
@@ -24,7 +25,7 @@ export default function NoticeBoardPage() {
       } catch (error) {
         console.error('Error fetching notices:', error);
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     };
 
@@ -109,7 +110,7 @@ export default function NoticeBoardPage() {
               </div>
 
               {/* Loading State */}
-              {isLoading ? (
+              {loading ? (
                 <div className="flex justify-center items-center h-64">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
                 </div>
@@ -120,7 +121,7 @@ export default function NoticeBoardPage() {
               ) : (
                 <div className="space-y-6">
                   {filteredNotices.map((notice) => (
-                    <NoticeBoard key={notice._id} notice={notice} />
+                    <NoticeComponent key={notice._id} notice={notice} />
                   ))}
                 </div>
               )}
