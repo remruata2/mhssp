@@ -57,19 +57,74 @@ export default function ContractorsPage() {
     }
   }
 
+  async function handleEdit(contractor: Contractor) {
+    setFormData({
+      name: contractor.name,
+      email: contractor.email || '',
+      phone: contractor.phone || '',
+      address: contractor.address || '',
+    });
+    setEditingId(contractor._id);
+    setIsEditing(true);
+    setIsModalOpen(true);
+  }
+
+  async function handleDelete(id: string) {
+    if (!window.confirm('Are you sure you want to delete this contractor?')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/procurement/contractors/${id}`, {
+        method: 'DELETE',
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        setSuccessMessage('Contractor deleted successfully');
+        setContractors(contractors.filter(c => c._id !== id));
+        setTimeout(() => setSuccessMessage(null), 3000);
+      } else {
+        setError(data.error || 'Failed to delete contractor');
+        setTimeout(() => setError(null), 3000);
+      }
+    } catch (error) {
+      setError('Failed to delete contractor');
+      setTimeout(() => setError(null), 3000);
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
     try {
+      // Validate form data
+      if (!formData.name.trim()) {
+        setError('Contractor name is required');
+        setLoading(false);
+        return;
+      }
+
+      if (formData.email && !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email)) {
+        setError('Please enter a valid email address');
+        setLoading(false);
+        return;
+      }
+
+      if (formData.phone && !/^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/.test(formData.phone)) {
+        setError('Please enter a valid phone number');
+        setLoading(false);
+        return;
+      }
+
       const url = isEditing 
-        ? `/api/procurement/contractors/${editingId}` 
+        ? `/api/procurement/contractors/${editingId}`
         : '/api/procurement/contractors';
-      const method = isEditing ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
-        method,
+        method: isEditing ? 'PUT' : 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -77,16 +132,19 @@ export default function ContractorsPage() {
       });
 
       const data = await response.json();
-      
+
       if (data.success) {
-        setSuccessMessage(
-          isEditing 
-            ? 'Contractor updated successfully!' 
-            : 'Contractor registered successfully!'
-        );
-        resetForm();
+        setSuccessMessage(isEditing ? 'Contractor updated successfully' : 'Contractor created successfully');
         fetchContractors();
         setIsModalOpen(false);
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          address: '',
+        });
+        setIsEditing(false);
+        setEditingId('');
       } else {
         setError(data.error || 'Failed to save contractor');
       }
@@ -97,56 +155,16 @@ export default function ContractorsPage() {
     }
   }
 
-  async function handleDelete(id: string) {
-    if (!confirm('Are you sure you want to delete this contractor? This action cannot be undone.')) {
-      return;
-    }
-
-    try {
-      const response = await fetch(`/api/procurement/contractors/${id}`, {
-        method: 'DELETE',
-      });
-
-      const data = await response.json();
-      
-      if (data.success) {
-        setSuccessMessage('Contractor deleted successfully!');
-        setContractors(contractors.filter(c => c._id !== id));
-      } else {
-        setError(data.error || 'Failed to delete contractor');
-      }
-    } catch (error) {
-      setError('Failed to delete contractor');
-    }
-  }
-
-  const handleEdit = (contractor: Contractor) => {
-    setFormData({
-      name: contractor.name || '',
-      email: contractor.email || '',
-      phone: contractor.phone || '',
-      address: contractor.address || '',
-    });
-    setIsEditing(true);
-    setEditingId(contractor._id);
-    setIsModalOpen(true);
-  };
-
   const handleAdd = () => {
-    resetForm();
-    setIsModalOpen(true);
-  };
-
-  const resetForm = () => {
+    setIsEditing(false);
+    setEditingId('');
     setFormData({
       name: '',
       email: '',
       phone: '',
       address: '',
     });
-    setIsEditing(false);
-    setEditingId('');
-    setError(null);
+    setIsModalOpen(true);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -174,7 +192,7 @@ export default function ContractorsPage() {
           className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 flex items-center gap-2"
         >
           <FaPlus className="h-4 w-4" />
-          Register New Contractor
+          Add Contractor
         </button>
       </div>
 
@@ -190,69 +208,83 @@ export default function ContractorsPage() {
         </div>
       )}
 
-      <div className="bg-white shadow-md rounded-lg overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Name
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Contact
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Address
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Registered Date
-              </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {contractors.map((contractor) => (
-              <tr key={contractor._id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap">
-                  {contractor.name || ''}
-                </td>
-                <td className="px-6 py-4">
-                  <div>{contractor.email || ''}</div>
-                  <div className="text-sm text-gray-500">{contractor.phone || ''}</div>
-                </td>
-                <td className="px-6 py-4">{contractor.address || ''}</td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  {new Date(contractor.createdAt || new Date().toISOString()).toLocaleDateString()}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <button
-                    onClick={() => handleEdit(contractor)}
-                    className="text-indigo-600 hover:text-indigo-900 mr-4"
-                    title="Edit"
-                  >
-                    <FaEdit className="h-5 w-5 inline" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(contractor._id)}
-                    className="text-red-600 hover:text-red-900"
-                    title="Delete"
-                  >
-                    <FaTrash className="h-5 w-5 inline" />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="mt-8">
+        <div className="overflow-x-auto">
+          <div className="inline-block min-w-full align-middle">
+            <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+              <table className="min-w-full table-fixed divide-y divide-gray-300">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="w-1/6 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Name
+                    </th>
+                    <th className="w-1/6 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Email
+                    </th>
+                    <th className="w-1/6 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Phone
+                    </th>
+                    <th className="w-2/6 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Address
+                    </th>
+                    <th className="w-1/6 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {contractors.map((contractor) => (
+                    <tr key={contractor._id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 text-sm text-gray-900 truncate">
+                        {contractor.name}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-900 truncate">
+                        {contractor.email}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-900 truncate">
+                        {contractor.phone}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-900 truncate">
+                        {contractor.address}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-900">
+                        <div className="flex space-x-3">
+                          <button
+                            onClick={() => handleEdit(contractor)}
+                            className="text-blue-600 hover:text-blue-900"
+                          >
+                            <FaEdit className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(contractor._id)}
+                            className="text-red-600 hover:text-red-900"
+                          >
+                            <FaTrash className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       </div>
 
       <SlideOver
-        title={isEditing ? "Edit Contractor" : "Register New Contractor"}
+        title={isEditing ? "Edit Contractor" : "Add Contractor"}
         isOpen={isModalOpen}
         onClose={() => {
           setIsModalOpen(false);
-          resetForm();
+          setFormData({
+            name: '',
+            email: '',
+            phone: '',
+            address: '',
+          });
+          setIsEditing(false);
+          setEditingId('');
         }}
       >
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -278,7 +310,7 @@ export default function ContractorsPage() {
 
           <div>
             <label htmlFor="email" className="form-label">
-              Email Address <span className="text-red-500">*</span>
+              Email Address
             </label>
             <input
               type="email"
@@ -287,14 +319,13 @@ export default function ContractorsPage() {
               value={formData.email}
               onChange={handleChange}
               className="form-input"
-              required
               maxLength={100}
             />
           </div>
 
           <div>
             <label htmlFor="phone" className="form-label">
-              Phone Number <span className="text-red-500">*</span>
+              Phone Number
             </label>
             <input
               type="tel"
@@ -303,15 +334,13 @@ export default function ContractorsPage() {
               value={formData.phone}
               onChange={handleChange}
               className="form-input"
-              required
-              pattern="[0-9]{10}"
-              title="Please enter a 10-digit phone number"
+              pattern="[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}"
             />
           </div>
 
           <div>
             <label htmlFor="address" className="form-label">
-              Address <span className="text-red-500">*</span>
+              Address
             </label>
             <textarea
               id="address"
@@ -319,8 +348,6 @@ export default function ContractorsPage() {
               value={formData.address}
               onChange={handleChange}
               className="form-textarea"
-              required
-              minLength={10}
               maxLength={300}
               rows={4}
             />
@@ -334,7 +361,14 @@ export default function ContractorsPage() {
               type="button"
               onClick={() => {
                 setIsModalOpen(false);
-                resetForm();
+                setFormData({
+                  name: '',
+                  email: '',
+                  phone: '',
+                  address: '',
+                });
+                setIsEditing(false);
+                setEditingId('');
               }}
               className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
             >
@@ -351,7 +385,7 @@ export default function ContractorsPage() {
                   Saving...
                 </span>
               ) : (
-                'Save'
+                isEditing ? 'Update' : 'Create'
               )}
             </button>
           </div>

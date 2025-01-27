@@ -241,11 +241,11 @@ export default function ConsultancyPage() {
       />
 
       <div className="bg-white shadow-md rounded-lg overflow-hidden mt-4">
-        <table className="min-w-full divide-y divide-gray-200">
+        <table className="min-w-full divide-y divide-gray-300">
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Contract/BID No
+                Contract/Bid No
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Consultancy Services
@@ -253,10 +253,10 @@ export default function ConsultancyPage() {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Contract Signed
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-48">
                 Contractor
               </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
                 Actions
               </th>
             </tr>
@@ -264,33 +264,33 @@ export default function ConsultancyPage() {
           <tbody className="bg-white divide-y divide-gray-200">
             {currentConsultancies.map((consultancy) => (
               <tr key={consultancy._id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {consultancy.contractBidNo}
                 </td>
-                <td className="px-6 py-4">
+                <td className="px-6 py-4 text-sm text-gray-900">
                   {consultancy.consultancyServices}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {new Date(consultancy.contractSigned).toLocaleDateString()}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 w-48 truncate">
                   {consultancy.contractor?.name}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <button
-                    onClick={() => handleEdit(consultancy)}
-                    className="text-indigo-600 hover:text-indigo-900 mr-4"
-                    title="Edit"
-                  >
-                    <FaEdit className="h-5 w-5 inline" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(consultancy._id)}
-                    className="text-red-600 hover:text-red-900"
-                    title="Delete"
-                  >
-                    <FaTrash className="h-5 w-5 inline" />
-                  </button>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 w-24">
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => handleEdit(consultancy)}
+                      className="text-blue-600 hover:text-blue-900"
+                    >
+                      <FaEdit className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(consultancy._id)}
+                      className="text-red-600 hover:text-red-900"
+                    >
+                      <FaTrash className="h-4 w-4" />
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
