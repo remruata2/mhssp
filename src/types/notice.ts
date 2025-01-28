@@ -6,6 +6,12 @@ export interface Notice {
   url?: string;
   isPublished: boolean;
   publishDate: string;
+  referenceNumber?: string;
+  department?: string;
+  category?: string;
+  description?: string;
+  expiryDate?: string;
+  priority?: 'low' | 'medium' | 'high';
 }
 
 export interface SubNotice {
@@ -13,6 +19,8 @@ export interface SubNotice {
   title: string;
   documentUrl: string;
   noticeId?: string;
+  referenceNumber?: string;
+  description?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -20,5 +28,6 @@ export interface SubNotice {
 export interface SubNoticeFormData {
   title: string;
   documentUrl: string;
-  file: File | null;
+  referenceNumber?: string;
+  description?: string;
 }

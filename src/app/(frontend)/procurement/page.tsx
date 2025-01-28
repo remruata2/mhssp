@@ -1,27 +1,28 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import PageTitle from '@/components/ui/PageTitle';
+import { useState, useEffect } from "react";
+import PageTitle from "@/components/ui/PageTitle";
 
 interface CivilWork {
   _id: string;
-  lotNo: number;
-  contractNo: number;
+  lotNo: string;
+  contractNo: string;
   workName: string;
   contractSignedDate: string;
   contractor: {
+    _id: string;
     name: string;
   };
 }
 
 interface Goods {
   _id: string;
-  referenceNo: number;
+  referenceNo: string;
   goodsCategory: {
     _id: string;
     name: string;
   };
-  itemName: string;
+  goodsName: string;
   quantity: number;
   contractSignedDate: string;
   contractor: {
@@ -46,28 +47,30 @@ export default function ProcurementPage() {
   const [goods, setGoods] = useState<Goods[]>([]);
   const [consultancy, setConsultancy] = useState<Consultancy[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'civil' | 'goods' | 'consultancy'>('civil');
+  const [activeTab, setActiveTab] = useState<"civil" | "goods" | "consultancy">(
+    "civil"
+  );
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const [civilWorksRes, goodsRes, consultancyRes] = await Promise.all([
-          fetch('/api/procurement/civil-works'),
-          fetch('/api/procurement/goods'),
-          fetch('/api/procurement/consultancy')
+          fetch("/api/procurement/civil-works"),
+          fetch("/api/procurement/goods"),
+          fetch("/api/procurement/consultancy"),
         ]);
 
         const [civilWorksData, goodsData, consultancyData] = await Promise.all([
           civilWorksRes.json(),
           goodsRes.json(),
-          consultancyRes.json()
+          consultancyRes.json(),
         ]);
 
         setCivilWorks(civilWorksData.data || []);
         setGoods(goodsData.data || []);
         setConsultancy(consultancyData.data || []);
       } catch (error) {
-        console.error('Error fetching procurement data:', error);
+        console.error("Error fetching procurement data:", error);
       } finally {
         setLoading(false);
       }
@@ -77,10 +80,10 @@ export default function ProcurementPage() {
   }, []);
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-IN', {
-      day: 'numeric',
-      month: 'numeric',
-      year: 'numeric'
+    return new Date(dateString).toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "numeric",
+      year: "numeric",
     });
   };
 
@@ -99,40 +102,40 @@ export default function ProcurementPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <PageTitle 
-        title="Procurement" 
+      <PageTitle
+        title="Procurement"
         subtitle="View all procurement notices, tenders, and contracts"
       />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Custom Tabs */}
         <div className="flex space-x-1 rounded-xl bg-blue-900 p-1 mb-6">
           <button
-            onClick={() => setActiveTab('civil')}
+            onClick={() => setActiveTab("civil")}
             className={`flex-1 rounded-lg py-2.5 text-sm font-medium leading-5 ${
-              activeTab === 'civil'
-                ? 'bg-white shadow text-blue-700'
-                : 'text-blue-100 hover:bg-white/[0.12] hover:text-white'
+              activeTab === "civil"
+                ? "bg-white shadow text-blue-700"
+                : "text-blue-100 hover:bg-white/[0.12] hover:text-white"
             }`}
           >
             Civil Works
           </button>
           <button
-            onClick={() => setActiveTab('goods')}
+            onClick={() => setActiveTab("goods")}
             className={`flex-1 rounded-lg py-2.5 text-sm font-medium leading-5 ${
-              activeTab === 'goods'
-                ? 'bg-white shadow text-blue-700'
-                : 'text-blue-100 hover:bg-white/[0.12] hover:text-white'
+              activeTab === "goods"
+                ? "bg-white shadow text-blue-700"
+                : "text-blue-100 hover:bg-white/[0.12] hover:text-white"
             }`}
           >
             Goods
           </button>
           <button
-            onClick={() => setActiveTab('consultancy')}
+            onClick={() => setActiveTab("consultancy")}
             className={`flex-1 rounded-lg py-2.5 text-sm font-medium leading-5 ${
-              activeTab === 'consultancy'
-                ? 'bg-white shadow text-blue-700'
-                : 'text-blue-100 hover:bg-white/[0.12] hover:text-white'
+              activeTab === "consultancy"
+                ? "bg-white shadow text-blue-700"
+                : "text-blue-100 hover:bg-white/[0.12] hover:text-white"
             }`}
           >
             Consultancy
@@ -140,7 +143,7 @@ export default function ProcurementPage() {
         </div>
 
         {/* Civil Works Table */}
-        {activeTab === 'civil' && (
+        {activeTab === "civil" && (
           <div className="bg-white shadow-md rounded-lg overflow-hidden">
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
@@ -185,7 +188,7 @@ export default function ProcurementPage() {
                         {formatDate(work.contractSignedDate)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {work.contractor.name}
+                        {work.contractor?.name || "Not Assigned"}
                       </td>
                     </tr>
                   ))}
@@ -196,7 +199,7 @@ export default function ProcurementPage() {
         )}
 
         {/* Goods Table */}
-        {activeTab === 'goods' && (
+        {activeTab === "goods" && (
           <div className="bg-white shadow-md rounded-lg overflow-hidden">
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
@@ -232,13 +235,13 @@ export default function ProcurementPage() {
                         {index + 1}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        GD-{item.referenceNo}
+                        {item.referenceNo}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {item.goodsCategory.name}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900">
-                        {item.itemName}
+                        {item.goodsName}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {item.quantity}
@@ -247,7 +250,7 @@ export default function ProcurementPage() {
                         {formatDate(item.contractSignedDate)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {item.contractor.name}
+                        {item.contractor?.name || "Not Assigned"}
                       </td>
                     </tr>
                   ))}
@@ -258,7 +261,7 @@ export default function ProcurementPage() {
         )}
 
         {/* Consultancy Table */}
-        {activeTab === 'consultancy' && (
+        {activeTab === "consultancy" && (
           <div className="bg-white shadow-md rounded-lg overflow-hidden">
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
@@ -297,7 +300,7 @@ export default function ProcurementPage() {
                         {formatDate(item.contractSigned)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {item.contractor.name}
+                        {item.contractor?.name || "Not Assigned"}
                       </td>
                     </tr>
                   ))}
