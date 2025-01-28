@@ -197,10 +197,10 @@ export default function CivilWorksPage() {
   const filteredCivilWorks = civilWorks.filter((item) => {
     const searchString = searchTerm.toLowerCase();
     return (
-      item.lotNo.toString().includes(searchString) ||
-      item.contractNo.toLowerCase().includes(searchString) ||
-      item.workName.toLowerCase().includes(searchString) ||
-      item.contractor?.name.toLowerCase().includes(searchString)
+      (item.lotNo?.toLowerCase() || '').includes(searchString) ||
+      (item.contractNo?.toLowerCase() || '').includes(searchString) ||
+      (item.workName?.toLowerCase() || '').includes(searchString) ||
+      (item.contractor?.name?.toLowerCase() || '').includes(searchString)
     );
   });
 
