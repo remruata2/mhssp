@@ -105,15 +105,16 @@ export default function GoodsPage() {
     setError('');
 
     try {
-      // Check if reference number already exists
-      if (!isEditing) {
-        const response = await fetch(`/api/procurement/goods/check-reference?referenceNo=${formData.referenceNo}`);
-        const data = await response.json();
-        if (!data.success) {
-          setError('Reference number already exists');
-          setLoading(false);
-          return;
-        }
+      // Validate all required fields
+      if (!formData.referenceNo.trim() || 
+          !formData.goodsName.trim() || 
+          !formData.goodsCategory || 
+          !formData.contractor || 
+          !formData.contractSignedDate || 
+          !formData.quantity) {
+        setError('All fields are required');
+        setLoading(false);
+        return;
       }
 
       const selectedContractor = contractors.find(c => c._id === formData.contractor);
@@ -131,15 +132,8 @@ export default function GoodsPage() {
         return;
       }
 
-      // Validate required fields
-      if (!formData.goodsName.trim()) {
-        setError('Goods name is required');
-        setLoading(false);
-        return;
-      }
-
-      if (!formData.quantity || Number(formData.quantity) < 0) {
-        setError('Quantity must be a positive number');
+      if (Number(formData.quantity) <= 0) {
+        setError('Quantity must be greater than 0');
         setLoading(false);
         return;
       }
@@ -151,7 +145,9 @@ export default function GoodsPage() {
         quantity: Number(formData.quantity)
       };
 
-      const url = isEditing ? `/api/procurement/goods/${editingId}` : '/api/procurement/goods';
+      const url = isEditing
+        ? `/api/procurement/goods/${editingId}`
+        : '/api/procurement/goods';
       const method = isEditing ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
@@ -169,7 +165,7 @@ export default function GoodsPage() {
         fetchGoods();
         setIsModalOpen(false);
       } else {
-        setError(data.error);
+        setError(data.error || 'Failed to save goods procurement');
       }
     } catch (error) {
       setError('Failed to save goods procurement');

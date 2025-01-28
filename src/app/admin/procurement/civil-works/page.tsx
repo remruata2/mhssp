@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { FaEdit, FaTrash, FaPlus } from 'react-icons/fa';
-import SearchAndFilter from '@/components/SearchAndFilter';
-import Pagination from '@/components/Pagination';
-import SlideOver from '@/components/SlideOver';
+import { useState, useEffect } from "react";
+import { FaEdit, FaTrash, FaPlus } from "react-icons/fa";
+import SearchAndFilter from "@/components/SearchAndFilter";
+import Pagination from "@/components/Pagination";
+import SlideOver from "@/components/SlideOver";
 
 interface Contractor {
   _id: string;
@@ -25,20 +25,20 @@ export default function CivilWorksPage() {
   const [civilWorks, setCivilWorks] = useState<CivilWorksProcurement[]>([]);
   const [contractors, setContractors] = useState<Contractor[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [error, setError] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
-    lotNo: '',
-    contractNo: '',
-    workName: '',
-    contractSignedDate: '',
-    contractor: '',
+    lotNo: "",
+    contractNo: "",
+    workName: "",
+    contractSignedDate: "",
+    contractor: "",
   });
   const [isEditing, setIsEditing] = useState(false);
-  const [editingId, setEditingId] = useState('');
+  const [editingId, setEditingId] = useState("");
 
   useEffect(() => {
     fetchCivilWorks();
@@ -47,20 +47,20 @@ export default function CivilWorksPage() {
 
   async function fetchContractors() {
     try {
-      const response = await fetch('/api/procurement/contractors');
+      const response = await fetch("/api/procurement/contractors");
       const data = await response.json();
       if (data.success) {
         setContractors(data.data);
       }
     } catch (error) {
-      console.error('Error fetching contractors:', error);
+      console.error("Error fetching contractors:", error);
     }
   }
 
   async function fetchCivilWorks() {
     try {
       setLoading(true);
-      const response = await fetch('/api/procurement/civil-works');
+      const response = await fetch("/api/procurement/civil-works");
       const data = await response.json();
       if (data.success) {
         setCivilWorks(data.data);
@@ -68,8 +68,8 @@ export default function CivilWorksPage() {
         setError(data.error);
       }
     } catch (error) {
-      console.error('Error fetching civil works:', error);
-      setError('Failed to fetch civil works');
+      console.error("Error fetching civil works:", error);
+      setError("Failed to fetch civil works");
     } finally {
       setLoading(false);
     }
@@ -78,25 +78,21 @@ export default function CivilWorksPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
-      const selectedContractor = contractors.find(c => c._id === formData.contractor);
+      // Validate required fields
+      if (!formData.lotNo.trim() || !formData.contractNo.trim() || !formData.workName.trim() || !formData.contractSignedDate || !formData.contractor) {
+        setError("All fields are required");
+        setLoading(false);
+        return;
+      }
+
+      const selectedContractor = contractors.find(
+        (c) => c._id === formData.contractor
+      );
       if (!selectedContractor) {
-        setError('Please select a contractor');
-        setLoading(false);
-        return;
-      }
-
-      // Validate lotNo and contractNo
-      if (!formData.lotNo.trim()) {
-        setError('Lot Number is required');
-        setLoading(false);
-        return;
-      }
-
-      if (!formData.contractNo.trim()) {
-        setError('Contract Number is required');
+        setError("Please select a contractor");
         setLoading(false);
         return;
       }
@@ -106,19 +102,21 @@ export default function CivilWorksPage() {
         contractor: selectedContractor._id,
       };
 
-      const url = isEditing ? `/api/procurement/civil-works/${editingId}` : '/api/procurement/civil-works';
-      const method = isEditing ? 'PUT' : 'POST';
+      const url = isEditing
+        ? `/api/procurement/civil-works/${editingId}`
+        : "/api/procurement/civil-works";
+      const method = isEditing ? "PUT" : "POST";
 
       const response = await fetch(url, {
         method,
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(civilWorksData),
       });
 
       const data = await response.json();
-      
+
       if (data.success) {
         resetForm();
         fetchCivilWorks();
@@ -127,40 +125,46 @@ export default function CivilWorksPage() {
         setError(data.error);
       }
     } catch (error) {
-      setError('Failed to save civil works procurement');
+      setError("Failed to save civil works procurement");
     } finally {
       setLoading(false);
     }
   }
 
   async function handleDelete(id: string) {
-    if (!window.confirm('Are you sure you want to delete this civil works procurement?')) {
+    if (
+      !window.confirm(
+        "Are you sure you want to delete this civil works procurement?"
+      )
+    ) {
       return;
     }
 
     try {
       const response = await fetch(`/api/procurement/civil-works/${id}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
 
       const data = await response.json();
       if (data.success) {
-        setCivilWorks(civilWorks.filter(c => c._id !== id));
+        setCivilWorks(civilWorks.filter((c) => c._id !== id));
       } else {
         setError(data.error);
       }
     } catch (error) {
-      setError('Failed to delete civil works procurement');
+      setError("Failed to delete civil works procurement");
     }
   }
 
   const handleEdit = (item: CivilWorksProcurement) => {
     setFormData({
-      lotNo: item.lotNo.toString(),
-      contractNo: item.contractNo,
-      workName: item.workName,
-      contractSignedDate: new Date(item.contractSignedDate).toISOString().split('T')[0],
-      contractor: item.contractor._id,
+      lotNo: item.lotNo || "",
+      contractNo: item.contractNo || "",
+      workName: item.workName || "",
+      contractSignedDate: item.contractSignedDate
+        ? new Date(item.contractSignedDate).toISOString().split("T")[0]
+        : "",
+      contractor: item.contractor?._id || "",
     });
     setIsEditing(true);
     setEditingId(item._id);
@@ -172,35 +176,39 @@ export default function CivilWorksPage() {
     setIsModalOpen(true);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const resetForm = () => {
     setFormData({
-      lotNo: '',
-      contractNo: '',
-      workName: '',
-      contractSignedDate: '',
-      contractor: '',
+      lotNo: "",
+      contractNo: "",
+      workName: "",
+      contractSignedDate: "",
+      contractor: "",
     });
     setIsEditing(false);
-    setEditingId('');
-    setError('');
+    setEditingId("");
+    setError("");
   };
 
   // Filter civil works based on search term
   const filteredCivilWorks = civilWorks.filter((item) => {
     const searchString = searchTerm.toLowerCase();
     return (
-      (item.lotNo?.toLowerCase() || '').includes(searchString) ||
-      (item.contractNo?.toLowerCase() || '').includes(searchString) ||
-      (item.workName?.toLowerCase() || '').includes(searchString) ||
-      (item.contractor?.name?.toLowerCase() || '').includes(searchString)
+      (item.lotNo?.toLowerCase() || "").includes(searchString) ||
+      (item.contractNo?.toLowerCase() || "").includes(searchString) ||
+      (item.workName?.toLowerCase() || "").includes(searchString) ||
+      (item.contractor?.name?.toLowerCase() || "").includes(searchString)
     );
   });
 
@@ -226,7 +234,9 @@ export default function CivilWorksPage() {
   return (
     <div className="max-w-7xl mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Civil Works Procurement</h1>
+        <h1 className="text-2xl font-bold text-gray-800">
+          Civil Works Procurement
+        </h1>
         <button
           onClick={handleAdd}
           className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 flex items-center gap-2"
@@ -276,12 +286,16 @@ export default function CivilWorksPage() {
             {currentCivilWorks.map((item) => (
               <tr key={item._id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">{item.lotNo}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{item.contractNo}</td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {item.contractNo}
+                </td>
                 <td className="px-6 py-4">{item.workName}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   {new Date(item.contractSignedDate).toLocaleDateString()}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">{item.contractor?.name}</td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {item.contractor?.name}
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <button
                     onClick={() => handleEdit(item)}
@@ -332,20 +346,23 @@ export default function CivilWorksPage() {
               value={formData.lotNo}
               onChange={handleChange}
               className="form-input"
+              placeholder="Enter lot number"
               required
             />
           </div>
 
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">
-              Contract Number
+          <div>
+            <label htmlFor="contractNo" className="form-label">
+              Contract No <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
+              id="contractNo"
               name="contractNo"
               value={formData.contractNo}
               onChange={handleChange}
               className="form-input"
+              placeholder="Enter contract number"
               required
             />
           </div>
@@ -423,7 +440,7 @@ export default function CivilWorksPage() {
                   Saving...
                 </span>
               ) : (
-                'Save'
+                "Save"
               )}
             </button>
           </div>

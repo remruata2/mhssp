@@ -22,7 +22,6 @@ const goodsProcurementSchema = new Schema<IGoodsProcurement>(
       type: String,
       required: [true, 'Reference number is required'],
       trim: true,
-      unique: true,
     },
     goodsCategory: {
       type: Schema.Types.ObjectId,
@@ -37,7 +36,7 @@ const goodsProcurementSchema = new Schema<IGoodsProcurement>(
     quantity: {
       type: Number,
       required: [true, 'Quantity is required'],
-      min: [0, 'Quantity cannot be negative'],
+      min: [1, 'Quantity must be greater than 0'],
     },
     contractSignedDate: {
       type: Date,
@@ -63,6 +62,20 @@ const goodsProcurementSchema = new Schema<IGoodsProcurement>(
   }
 );
 
+// Drop the existing unique index if it exists
+const dropIndex = async () => {
+  try {
+    const model = models.GoodsProcurement || model('GoodsProcurement', goodsProcurementSchema);
+    await model.collection.dropIndex('referenceNo_1');
+  } catch (error) {
+    // Index might not exist, which is fine
+    console.log('No index to drop or already dropped');
+  }
+};
+
+// Execute dropIndex
+dropIndex();
+
 // Create indexes for better query performance
 goodsProcurementSchema.index({ createdAt: -1 });
 goodsProcurementSchema.index({ goodsCategory: 1 });
@@ -77,4 +90,7 @@ goodsProcurementSchema.virtual('formattedContractSignedDate').get(function (this
   });
 });
 
-export default model<IGoodsProcurement>('GoodsProcurement', goodsProcurementSchema);
+// Create or update the model
+const GoodsProcurement = models.GoodsProcurement || model<IGoodsProcurement>('GoodsProcurement', goodsProcurementSchema);
+
+export default GoodsProcurement;
