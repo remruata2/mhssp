@@ -53,14 +53,15 @@ export async function POST(req: Request) {
     if (error instanceof Error && error.message.includes('E11000 duplicate key error')) {
       // Try to drop the index again and retry the operation
       try {
+        const retryData = await req.clone().json(); // Clone the request since it was already read
         await GoodsProcurement.collection.dropIndex('referenceNo_1');
-        const goods = await GoodsProcurement.create(data);
+        const goods = await GoodsProcurement.create(retryData);
         const populatedGoods = await GoodsProcurement.findById(goods._id)
           .populate('goodsCategory', 'name')
           .populate('contractor', 'name')
           .lean();
         return NextResponse.json({ success: true, data: populatedGoods }, { status: 201 });
-      } catch (retryError) {
+      } catch (_retryError) {
         return NextResponse.json(
           { 
             success: false, 

@@ -51,9 +51,12 @@ export default function CivilWorksPage() {
       const data = await response.json();
       if (data.success) {
         setContractors(data.data);
+      } else {
+        setError(data.error || "Failed to fetch contractors");
       }
-    } catch (error) {
-      console.error("Error fetching contractors:", error);
+    } catch (_error) {
+      console.error("Error fetching contractors:", _error);
+      setError("Failed to fetch contractors");
     }
   }
 
@@ -67,8 +70,8 @@ export default function CivilWorksPage() {
       } else {
         setError(data.error);
       }
-    } catch (error) {
-      console.error("Error fetching civil works:", error);
+    } catch (_error) {
+      console.error("Error fetching civil works:", _error);
       setError("Failed to fetch civil works");
     } finally {
       setLoading(false);
@@ -124,7 +127,7 @@ export default function CivilWorksPage() {
       } else {
         setError(data.error);
       }
-    } catch (error) {
+    } catch (_error) {
       setError("Failed to save civil works procurement");
     } finally {
       setLoading(false);
@@ -151,25 +154,29 @@ export default function CivilWorksPage() {
       } else {
         setError(data.error);
       }
-    } catch (error) {
+    } catch (_error) {
       setError("Failed to delete civil works procurement");
     }
   }
 
-  const handleEdit = (item: CivilWorksProcurement) => {
-    setFormData({
-      lotNo: item.lotNo || "",
-      contractNo: item.contractNo || "",
-      workName: item.workName || "",
-      contractSignedDate: item.contractSignedDate
-        ? new Date(item.contractSignedDate).toISOString().split("T")[0]
-        : "",
-      contractor: item.contractor?._id || "",
-    });
-    setIsEditing(true);
-    setEditingId(item._id);
-    setIsModalOpen(true);
-  };
+  async function handleEdit(civilWork: CivilWorksProcurement) {
+    try {
+      setIsEditing(true);
+      setEditingId(civilWork._id);
+      
+      const formattedData = {
+        ...civilWork,
+        contractor: civilWork.contractor?._id || '',
+        contractSignedDate: civilWork.contractSignedDate ? new Date(civilWork.contractSignedDate).toISOString().split('T')[0] : '',
+      };
+      
+      setFormData(formattedData);
+      setIsModalOpen(true);
+    } catch (_error) {
+      console.error('Error preparing edit form:', _error);
+      setError('Failed to prepare edit form');
+    }
+  }
 
   const handleAdd = () => {
     resetForm();

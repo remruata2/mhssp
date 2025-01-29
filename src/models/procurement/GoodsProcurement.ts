@@ -1,4 +1,4 @@
-import { Schema, model, models, Document } from 'mongoose';
+import { Schema, model, models, Document, Model } from 'mongoose';
 
 // Clear any existing model to prevent stale schema
 if (models.GoodsProcurement) {
@@ -65,9 +65,9 @@ const goodsProcurementSchema = new Schema<IGoodsProcurement>(
 // Drop the existing unique index if it exists
 const dropIndex = async () => {
   try {
-    const model = models.GoodsProcurement || model('GoodsProcurement', goodsProcurementSchema);
-    await model.collection.dropIndex('referenceNo_1');
-  } catch (error) {
+    const GoodsProcurementModel: Model<IGoodsProcurement> = models.GoodsProcurement || model<IGoodsProcurement>('GoodsProcurement', goodsProcurementSchema);
+    await GoodsProcurementModel.collection.dropIndex('referenceNo_1');
+  } catch (_) {
     // Index might not exist, which is fine
     console.log('No index to drop or already dropped');
   }

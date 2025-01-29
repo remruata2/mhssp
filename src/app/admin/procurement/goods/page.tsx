@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { FaEdit, FaTrash, FaPlus } from 'react-icons/fa';
-import SearchAndFilter from '@/components/SearchAndFilter';
-import Pagination from '@/components/Pagination';
-import SlideOver from '@/components/SlideOver';
+import { useState, useEffect } from "react";
+import { FaEdit, FaTrash, FaPlus } from "react-icons/fa";
+import SearchAndFilter from "@/components/SearchAndFilter";
+import Pagination from "@/components/Pagination";
+import SlideOver from "@/components/SlideOver";
 
 interface Contractor {
   _id: string;
@@ -32,22 +32,22 @@ export default function GoodsPage() {
   const [contractors, setContractors] = useState<Contractor[]>([]);
   const [categories, setCategories] = useState<GoodsCategory[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [error, setError] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const itemsPerPage = 10;
 
   const [formData, setFormData] = useState({
-    referenceNo: '',
-    goodsCategory: '',
-    goodsName: '',
-    quantity: '',
-    contractSignedDate: '',
-    contractor: '',
+    referenceNo: "",
+    goodsCategory: "",
+    goodsName: "",
+    quantity: "",
+    contractSignedDate: "",
+    contractor: "",
   });
   const [isEditing, setIsEditing] = useState(false);
-  const [editingId, setEditingId] = useState('');
+  const [editingId, setEditingId] = useState("");
 
   useEffect(() => {
     fetchGoods();
@@ -57,34 +57,37 @@ export default function GoodsPage() {
 
   async function fetchContractors() {
     try {
-      const response = await fetch('/api/procurement/contractors');
+      const response = await fetch("/api/procurement/contractors");
       const data = await response.json();
       if (data.success) {
         setContractors(data.data);
+      } else {
+        setError(data.error || "Failed to fetch contractors");
       }
-    } catch (error) {
-      console.error('Error fetching contractors:', error);
+    } catch (_error) {
+      console.error("Error fetching contractors:", _error);
+      setError("Failed to fetch contractors");
     }
   }
 
   async function fetchCategories() {
     try {
-      const response = await fetch('/api/procurement/goods/categories');
+      const response = await fetch("/api/procurement/goods/categories");
       const data = await response.json();
       if (data.success) {
         setCategories(data.data);
       } else {
-        console.error('Failed to fetch categories:', data.error);
+        console.error("Failed to fetch categories:", data.error);
       }
     } catch (error) {
-      console.error('Error fetching categories:', error);
+      console.error("Error fetching categories:", error);
     }
   }
 
   async function fetchGoods() {
     try {
       setLoading(true);
-      const response = await fetch('/api/procurement/goods');
+      const response = await fetch("/api/procurement/goods");
       const data = await response.json();
       if (data.success) {
         setGoods(data.data);
@@ -92,8 +95,8 @@ export default function GoodsPage() {
         setError(data.error);
       }
     } catch (error) {
-      console.error('Error fetching goods:', error);
-      setError('Failed to fetch goods');
+      console.error("Error fetching goods:", error);
+      setError("Failed to fetch goods");
     } finally {
       setLoading(false);
     }
@@ -102,38 +105,44 @@ export default function GoodsPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
       // Validate all required fields
-      if (!formData.referenceNo.trim() || 
-          !formData.goodsName.trim() || 
-          !formData.goodsCategory || 
-          !formData.contractor || 
-          !formData.contractSignedDate || 
-          !formData.quantity) {
-        setError('All fields are required');
+      if (
+        !formData.referenceNo.trim() ||
+        !formData.goodsName.trim() ||
+        !formData.goodsCategory ||
+        !formData.contractor ||
+        !formData.contractSignedDate ||
+        !formData.quantity
+      ) {
+        setError("All fields are required");
         setLoading(false);
         return;
       }
 
-      const selectedContractor = contractors.find(c => c._id === formData.contractor);
-      const selectedCategory = categories.find(c => c._id === formData.goodsCategory);
-      
+      const selectedContractor = contractors.find(
+        (c) => c._id === formData.contractor
+      );
+      const selectedCategory = categories.find(
+        (c) => c._id === formData.goodsCategory
+      );
+
       if (!selectedContractor) {
-        setError('Please select a contractor');
+        setError("Please select a contractor");
         setLoading(false);
         return;
       }
 
       if (!selectedCategory) {
-        setError('Please select a category');
+        setError("Please select a category");
         setLoading(false);
         return;
       }
 
       if (Number(formData.quantity) <= 0) {
-        setError('Quantity must be greater than 0');
+        setError("Quantity must be greater than 0");
         setLoading(false);
         return;
       }
@@ -142,56 +151,61 @@ export default function GoodsPage() {
         ...formData,
         contractor: selectedContractor._id,
         goodsCategory: selectedCategory._id,
-        quantity: Number(formData.quantity)
+        quantity: Number(formData.quantity),
       };
 
       const url = isEditing
         ? `/api/procurement/goods/${editingId}`
-        : '/api/procurement/goods';
-      const method = isEditing ? 'PUT' : 'POST';
+        : "/api/procurement/goods";
+      const method = isEditing ? "PUT" : "POST";
 
       const response = await fetch(url, {
         method,
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(goodsData),
       });
 
       const data = await response.json();
-      
+
       if (data.success) {
         resetForm();
         fetchGoods();
         setIsModalOpen(false);
       } else {
-        setError(data.error || 'Failed to save goods procurement');
+        setError(data.error || "Failed to save goods procurement");
       }
     } catch (error) {
-      setError('Failed to save goods procurement');
+      setError("Failed to save goods procurement");
+      console.log(error);
     } finally {
       setLoading(false);
     }
   }
 
   async function handleDelete(id: string) {
-    if (!window.confirm('Are you sure you want to delete this goods procurement?')) {
+    if (
+      !window.confirm("Are you sure you want to delete this goods procurement?")
+    ) {
       return;
     }
 
     try {
       const response = await fetch(`/api/procurement/goods/${id}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
 
       const data = await response.json();
+
       if (data.success) {
-        setGoods(goods.filter(g => g._id !== id));
+        setGoods(goods.filter((g) => g._id !== id));
       } else {
-        setError(data.error);
+        setError(data.error || "Failed to delete goods procurement");
       }
-    } catch (error) {
-      setError('Failed to delete goods procurement');
+    } catch (_error) {
+      console.error("Error deleting goods:", _error);
+      setError("Failed to delete goods procurement");
     }
   }
 
@@ -201,7 +215,9 @@ export default function GoodsPage() {
       goodsCategory: item.goodsCategory._id,
       goodsName: item.goodsName,
       quantity: item.quantity.toString(),
-      contractSignedDate: new Date(item.contractSignedDate).toISOString().split('T')[0],
+      contractSignedDate: new Date(item.contractSignedDate)
+        .toISOString()
+        .split("T")[0],
       contractor: item.contractor._id,
     });
     setIsEditing(true);
@@ -214,26 +230,30 @@ export default function GoodsPage() {
     setIsModalOpen(true);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const resetForm = () => {
     setFormData({
-      referenceNo: '',
-      goodsCategory: '',
-      goodsName: '',
-      quantity: '',
-      contractSignedDate: '',
-      contractor: '',
+      referenceNo: "",
+      goodsCategory: "",
+      goodsName: "",
+      quantity: "",
+      contractSignedDate: "",
+      contractor: "",
     });
     setIsEditing(false);
-    setEditingId('');
-    setError('');
+    setEditingId("");
+    setError("");
   };
 
   // Filter goods based on search term
@@ -321,14 +341,20 @@ export default function GoodsPage() {
           <tbody className="bg-white divide-y divide-gray-200">
             {currentGoods.map((item) => (
               <tr key={item._id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap">{item.referenceNo}</td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {item.referenceNo}
+                </td>
                 <td className="px-6 py-4">{item.goodsName}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{item.goodsCategory?.name}</td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {item.goodsCategory?.name}
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap">{item.quantity}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   {new Date(item.contractSignedDate).toLocaleDateString()}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">{item.contractor?.name}</td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {item.contractor?.name}
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <button
                     onClick={() => handleEdit(item)}
@@ -493,7 +519,7 @@ export default function GoodsPage() {
                   Saving...
                 </span>
               ) : (
-                'Save'
+                "Save"
               )}
             </button>
           </div>
