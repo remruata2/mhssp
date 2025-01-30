@@ -176,12 +176,10 @@ export default function NoticesPage() {
               Object.entries(groupedNotices).map(([date, notices]) => (
                 <div key={date} className="space-y-4">
                   <div className="flex items-center">
-                    <div className="flex-grow border-t border-gray-200"></div>
                     <FaCalendarAlt className="h-5 w-5 text-blue-700" />
                     <h2 className="px-4 text-lg font-semibold text-blue-700">
                       {date}
                     </h2>
-                    <div className="flex-grow border-t border-gray-200"></div>
                   </div>
                   <div className="space-y-4">
                     {notices.map((notice) => (

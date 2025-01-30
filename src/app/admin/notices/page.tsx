@@ -74,10 +74,11 @@ export default function NoticesPage() {
 
   const fetchNotices = async () => {
     try {
-      const response = await fetch("/api/notices");
+      const response = await fetch("/api/admin/notices");
       const data = await response.json();
       if (data.success) {
         setNotices(data.data);
+        setFilteredNotices(data.data);
       } else {
         setError("Failed to fetch notices");
         console.error("Error fetching notices:", data);
