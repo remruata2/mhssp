@@ -5,7 +5,7 @@ const noticeSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Title is required'],
     minlength: [3, 'Title must be at least 3 characters long'],
-    maxlength: [100, 'Title cannot exceed 100 characters'],
+    maxlength: [250, 'Title cannot exceed 250 characters'],
   },
   type: {
     type: String,
