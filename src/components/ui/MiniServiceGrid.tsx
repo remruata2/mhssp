@@ -1,29 +1,32 @@
-'use client';
+"use client";
 
-import { FaHospital, FaUserMd, FaHandHoldingMedical } from 'react-icons/fa';
-import ServiceBlock from './ServiceBlock';
-import Link from 'next/link';
-import { FaArrowRight } from 'react-icons/fa';
+import { FaHospital, FaUserMd, FaHandHoldingMedical } from "react-icons/fa";
+import ServiceBlock from "./ServiceBlock";
+import Link from "next/link";
+import { FaArrowRight } from "react-icons/fa";
 
 const featuredServices = [
   {
     icon: <FaHospital />,
     title: "Health Infrastructure",
-    description: "Strengthening healthcare facilities and infrastructure across Mizoram to ensure better access to quality healthcare services.",
-    link: "/services/infrastructure"
+    description:
+      "Strengthening healthcare facilities and infrastructure across Mizoram to ensure better access to quality healthcare services.",
+    link: "/services/infrastructure",
   },
   {
     icon: <FaUserMd />,
     title: "Healthcare Professionals",
-    description: "Training and capacity building of healthcare workers to deliver high-quality medical services to the community.",
-    link: "/services/professionals"
+    description:
+      "Training and capacity building of healthcare workers to deliver high-quality medical services to the community.",
+    link: "/services/professionals",
   },
   {
     icon: <FaHandHoldingMedical />,
     title: "Community Health",
-    description: "Engaging with communities to promote better health practices and ensure healthcare reaches every citizen.",
-    link: "/services/community"
-  }
+    description:
+      "Engaging with communities to promote better health practices and ensure healthcare reaches every citizen.",
+    link: "/services/community",
+  },
 ];
 
 export default function MiniServiceGrid() {
@@ -35,8 +38,8 @@ export default function MiniServiceGrid() {
             <h2 className="text-2xl font-bold text-gray-900">Our Services</h2>
             <div className="mt-2 w-20 h-1 bg-red-600"></div>
           </div>
-          <Link 
-            href="/services" 
+          <Link
+            href="/services"
             className="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium"
           >
             View All Services <FaArrowRight className="ml-2" />

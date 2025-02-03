@@ -1,26 +1,30 @@
-'use client';
+"use client";
 
-import ProjectHighlight from './ui/ProjectHighlight';
+import ProjectHighlight from "./ui/ProjectHighlight";
 
 const projects = [
   {
-    title: 'Strengthening Healthcare Infrastructure',
-    description: 'We are working to enhance healthcare facilities across Mizoram by upgrading existing infrastructure and establishing new medical centers. This includes modernizing equipment, improving patient care facilities, and implementing digital health solutions.',
-    image: '/images/healthcare-facility.jpg',
-    link: '/projects/healthcare-infrastructure'
+    title:
+      "Clinical Vignettes for Clinical Knowledge & Skill Improvement (CSKI)",
+    description:
+      "This clinical skill development program is available for continuing education of healthcare professionals working in Mizoram. This program is offered through the MHSSP Clinical Skill Development App which is available to download on Android devices via Play Store.",
+    image: "/images/cksi.jpg",
+    link: "/projects/healthcare-infrastructure",
   },
   {
-    title: 'Community Health Programs',
-    description: 'Our community health initiatives focus on preventive healthcare, health education, and early intervention. We work closely with local communities to promote better health practices and ensure healthcare accessibility.',
-    image: '/images/community-health.webp',
-    link: '/projects/community-health'
+    title: "Community Health Programs",
+    description:
+      "Our community health initiatives focus on preventive healthcare, health education, and early intervention. We work closely with local communities to promote better health practices and ensure healthcare accessibility.",
+    image: "/images/community-health.webp",
+    link: "/projects/community-health",
   },
   {
-    title: 'Medical Education & Training',
-    description: 'We are committed to building a strong healthcare workforce through comprehensive training programs, skill development workshops, and continuous medical education initiatives for healthcare professionals.',
-    image: '/images/digital-health.jpg',
-    link: '/projects/medical-education'
-  }
+    title: "Medical Education & Training",
+    description:
+      "We are committed to building a strong healthcare workforce through comprehensive training programs, skill development workshops, and continuous medical education initiatives for healthcare professionals.",
+    image: "/images/digital-health.jpg",
+    link: "/projects/medical-education",
+  },
 ];
 
 export default function Projects() {

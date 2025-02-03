@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import Image from 'next/image';
-import Link from 'next/link';
-import { motion } from 'framer-motion';
+import Image from "next/image";
+import Link from "next/link";
+import { motion } from "framer-motion";
 
 export default function HeroBanner() {
   return (
@@ -21,16 +21,17 @@ export default function HeroBanner() {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative z-10 container mx-auto px-4 pb-5 sm:px-6 lg:px-8">
         <div className="max-w-3xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-6 leading-tight">
-              Transforming Healthcare in Mizoram
-            </h1>
+            <h4 className="text-2xl sm:text-3xl md:text-5xl font-bold text-white mt-3 mb-6 leading-tight">
+              Improving Management Capacity and Quality of Health Services in
+              Mizoram
+            </h4>
           </motion.div>
 
           <motion.div
@@ -39,7 +40,8 @@ export default function HeroBanner() {
             transition={{ duration: 0.8, delay: 0.2 }}
           >
             <p className="text-lg sm:text-xl text-white/90 mb-8 max-w-2xl">
-              Empowering communities through innovative healthcare solutions, modern facilities, and sustainable development initiatives.
+              Empowering communities through innovative healthcare solutions,
+              modern facilities, and sustainable development initiatives.
             </p>
           </motion.div>
 
@@ -84,9 +86,9 @@ export default function HeroBanner() {
             className="mt-12 grid grid-cols-2 sm:grid-cols-3 gap-8"
           >
             {[
-              { number: '100+', label: 'Healthcare Facilities' },
-              { number: '500+', label: 'Medical Professionals' },
-              { number: '50K+', label: 'Patients Served' },
+              { number: "10+", label: "NQAS Certified Hospitals" },
+              { number: "500+", label: "Medical Professionals" },
+              { number: "50K+", label: "Patients Served" },
             ].map((stat, index) => (
               <div key={index} className="text-white">
                 <div className="text-3xl font-bold">{stat.number}</div>
