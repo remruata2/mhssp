@@ -3,44 +3,35 @@ import NextAuth from "next-auth/next";
 import CredentialsProvider from "next-auth/providers/credentials";
 import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
+import bcrypt from 'bcrypt';
 
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
-      name: "credentials",
+      name: 'credentials',
       credentials: {
-        username: { label: "Username", type: "text" },
-        password: { label: "Password", type: "password" }
+        email: { label: 'Email', type: 'text' },
+        password: { label: 'Password', type: 'password' }
       },
       async authorize(credentials) {
-        if (!credentials?.username || !credentials?.password) {
-          return null;
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error('Email and password are required');
         }
 
         try {
           await dbConnect();
-          const user = await User.findOne({ username: credentials.username });
+          const user = await User.findOne({ email: credentials.email });
+          if (!user) throw new Error('Invalid credentials');
 
-          if (!user) {
-            return null;
-          }
+          const isValid = await bcrypt.compare(credentials.password, user.password);
+          if (!isValid) throw new Error('Invalid credentials');
 
-          const passwordMatch = await user.matchPassword(credentials.password);
-
-          if (!passwordMatch) {
-            return null;
-          }
-
-          return {
-            id: user._id.toString(),
-            username: user.username,
-            role: user.role,
-          };
+          return { id: user._id.toString(), email: user.email, role: user.role };
         } catch (error) {
-          console.error('Auth error:', error);
+          console.error('Authentication error:', error);
           return null;
         }
-      },
+      }
     }),
   ],
   session: {
@@ -53,14 +44,14 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.role = user.role;
-        token.username = user.username;
+        token.email = user.email;
       }
       return token;
     },
     async session({ session, token }) {
       if (token) {
         session.user.role = token.role;
-        session.user.username = token.username;
+        session.user.email = token.email;
       }
       return session;
     },

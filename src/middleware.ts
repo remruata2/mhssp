@@ -16,12 +16,16 @@ export async function middleware(request: NextRequest) {
 
   // Redirect to login if accessing admin path without auth
   if (!isPublicPath && path.startsWith('/admin') && !token) {
-    return NextResponse.redirect(new URL('/admin/login', request.url));
+    return NextResponse.redirect(
+      new URL('/admin/login', process.env.NEXTAUTH_URL)
+    );
   }
 
   // Redirect to admin dashboard if accessing login while authenticated
   if (isPublicPath && token) {
-    return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+    return NextResponse.redirect(
+      new URL('/admin/dashboard', process.env.NEXTAUTH_URL)
+    );
   }
 
   return NextResponse.next();

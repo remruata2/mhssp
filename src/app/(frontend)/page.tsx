@@ -8,7 +8,6 @@ export default function HomePage() {
   return (
     <div className="min-h-screen">
       <HeroBanner />
-      <MiniServiceGrid />
       <Projects />
     </div>
   );
