@@ -55,16 +55,19 @@ export default function AdminLogin() {
 				redirect: false,
 			});
 
+			if (result?.error) {
+				setError(result.error);
+				setIsLoading(false);
+				return;
+			}
+
 			if (result?.ok) {
 				router.push("/admin/dashboard");
 				router.refresh();
-			} else {
-				setError("Invalid username or password");
-				setIsLoading(false);
 			}
 		} catch (error: unknown) {
-			const message = error instanceof Error ? error.message : "Unknown error";
-			setError(`An error occurred: ${message}`);
+			const message = error instanceof Error ? error.message : "An error occurred";
+			setError(message);
 			setIsLoading(false);
 		}
 	};

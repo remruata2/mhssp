@@ -7,7 +7,7 @@ export async function GET() {
 		await dbConnect();
 		const categories = await GoodsCategory.find({}).sort({ name: 1 });
 		return NextResponse.json({ success: true, data: categories });
-	} catch (error) {
+	} catch {
 		return NextResponse.json(
 			{ success: false, error: "Failed to fetch categories" },
 			{ status: 500 }

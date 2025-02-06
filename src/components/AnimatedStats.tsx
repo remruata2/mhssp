@@ -3,7 +3,7 @@
 
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { FaHospital, FaUserTie, FaMoneyBill } from "react-icons/fa";
+import { FaHospital } from "react-icons/fa";
 import { PiCertificateLight } from "react-icons/pi";
 
 interface AnimatedStatProps {

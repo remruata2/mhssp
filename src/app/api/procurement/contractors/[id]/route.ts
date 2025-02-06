@@ -19,7 +19,7 @@ export async function GET(
 		}
 
 		return NextResponse.json({ success: true, data: contractor });
-	} catch (error) {
+	} catch {
 		return NextResponse.json(
 			{ success: false, error: "Failed to fetch contractor" },
 			{ status: 500 }
@@ -81,7 +81,7 @@ export async function DELETE(
 		}
 
 		return NextResponse.json({ success: true, data: {} });
-	} catch (error) {
+	} catch {
 		return NextResponse.json(
 			{ success: false, error: "Failed to delete contractor" },
 			{ status: 500 }

@@ -1,12 +1,13 @@
 declare global {
-  namespace NodeJS {
-    interface Global {
-      mongoose: {
-        conn: mongoose.Connection | null;
-        promise: Promise<mongoose.Connection> | null;
-      };
-    }
-  }
+	namespace NodeJS {
+		interface Global {
+			mongoose: {
+				conn: typeof mongoose | null;
+
+				promise: Promise<typeof mongoose> | null;
+			};
+		}
+	}
 }
 
 export {};

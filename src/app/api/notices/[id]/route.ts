@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from "next/server";
-import dbConnect from "@/lib/mongodb";
+import dbConnect from "@/lib/db";
 import { Notice } from "@/models/Notice";
 
 interface RouteParams {
@@ -31,10 +31,13 @@ export async function GET(request: NextRequest, context: RouteParams) {
 
 		return NextResponse.json({ success: true, data: notice });
 	} catch (error: unknown) {
-		const errorMessage =
-			error instanceof Error ? error.message : "An error occurred";
+		const err = error as Error & { errors?: Record<string, unknown> };
 		return NextResponse.json(
-			{ success: false, error: errorMessage },
+			{
+				success: false,
+				error: err.message || "Server error",
+				...(err.errors && { details: err.errors }),
+			},
 			{ status: 500 }
 		);
 	}
@@ -174,10 +177,14 @@ export async function PUT(
 		}
 
 		return NextResponse.json({ success: true, data: notice });
-	} catch (error: any) {
-		console.error("Error updating notice:", error);
+	} catch (error: unknown) {
+		const err = error as Error & { errors?: Record<string, unknown> };
 		return NextResponse.json(
-			{ success: false, error: error.message || "Failed to update notice" },
+			{
+				success: false,
+				error: err.message || "Server error",
+				...(err.errors && { details: err.errors }),
+			},
 			{ status: 500 }
 		);
 	}
@@ -206,10 +213,13 @@ export async function DELETE(request: NextRequest, context: RouteParams) {
 
 		return NextResponse.json({ success: true, data: notice });
 	} catch (error: unknown) {
-		const errorMessage =
-			error instanceof Error ? error.message : "An error occurred";
+		const err = error as Error & { errors?: Record<string, unknown> };
 		return NextResponse.json(
-			{ success: false, error: errorMessage },
+			{
+				success: false,
+				error: err.message || "Server error",
+				...(err.errors && { details: err.errors }),
+			},
 			{ status: 500 }
 		);
 	}

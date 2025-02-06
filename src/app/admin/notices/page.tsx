@@ -322,9 +322,11 @@ export default function NoticesPage() {
       setEditingId("");
       fetchNotices();
       setIsModalOpen(false);
-    } catch (err: any) {
-      setError(err.message);
-      console.error("Error submitting notice:", err);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+        console.error("Error submitting notice:", err);
+      }
     } finally {
       setIsLoading(false);
     }

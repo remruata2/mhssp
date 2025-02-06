@@ -33,8 +33,8 @@ export default function NoticesPage() {
 					setNotices(sortedNotices);
 					setFilteredNotices(sortedNotices);
 				}
-			} catch (error) {
-				console.error("Error fetching notices:", error);
+			} catch {
+				console.error("Error fetching notices:");
 			} finally {
 				setLoading(false);
 			}

@@ -1,4 +1,5 @@
 import { Schema, model, models, Document, Model } from "mongoose";
+import dbConnect from "@/lib/db";
 
 // Clear any existing model to prevent stale schema
 if (models.GoodsProcurement) {
@@ -20,7 +21,7 @@ const goodsProcurementSchema = new Schema<IGoodsProcurement>(
 	{
 		referenceNo: {
 			type: String,
-			required: [true, "Reference number is required"],
+			required: true,
 			trim: true,
 		},
 		goodsCategory: {
@@ -62,22 +63,6 @@ const goodsProcurementSchema = new Schema<IGoodsProcurement>(
 	}
 );
 
-// Drop the existing unique index if it exists
-const dropIndex = async () => {
-	try {
-		const GoodsProcurementModel: Model<IGoodsProcurement> =
-			models.GoodsProcurement ||
-			model<IGoodsProcurement>("GoodsProcurement", goodsProcurementSchema);
-		await GoodsProcurementModel.collection.dropIndex("referenceNo_1");
-	} catch (error) {
-		// Index might not exist, which is fine
-		console.log("No index to drop or already dropped", error);
-	}
-};
-
-// Execute dropIndex
-dropIndex();
-
 // Create indexes for better query performance
 goodsProcurementSchema.index({ createdAt: -1 });
 goodsProcurementSchema.index({ goodsCategory: 1 });
@@ -94,9 +79,9 @@ goodsProcurementSchema
 		});
 	});
 
-// Create or update the model
+// Create or update the model with proper type casting
 const GoodsProcurement =
-	models.GoodsProcurement ||
+	(models.GoodsProcurement as Model<IGoodsProcurement>) ||
 	model<IGoodsProcurement>("GoodsProcurement", goodsProcurementSchema);
 
 export default GoodsProcurement;

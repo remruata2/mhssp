@@ -24,7 +24,7 @@ export async function GET(request: NextRequest, context: RouteParams) {
 		}
 
 		return NextResponse.json({ success: true, data: goods });
-	} catch (error) {
+	} catch {
 		return NextResponse.json(
 			{ success: false, error: "Failed to fetch goods procurement" },
 			{ status: 500 }
@@ -35,24 +35,10 @@ export async function GET(request: NextRequest, context: RouteParams) {
 export async function PUT(request: NextRequest, context: RouteParams) {
 	try {
 		const body = await request.json();
+		const { id } = await context.params;
 		await dbConnect();
 
-		// First check if the reference number exists for any other document
-		if (body.referenceNo) {
-			const existingGoods = await GoodsProcurement.findOne({
-				referenceNo: body.referenceNo,
-				_id: { $ne: context.params.id },
-			});
-
-			if (existingGoods) {
-				return NextResponse.json(
-					{ success: false, error: "Reference number already exists" },
-					{ status: 400 }
-				);
-			}
-		}
-
-		const goods = await GoodsProcurement.findByIdAndUpdate(context.params.id, body, {
+		const goods = await GoodsProcurement.findByIdAndUpdate(id, body, {
 			new: true,
 			runValidators: true,
 		})
@@ -95,10 +81,16 @@ export async function DELETE(request: NextRequest, context: RouteParams) {
 			);
 		}
 
-		return NextResponse.json({ success: true, data: {} });
+		return NextResponse.json({ success: true, data: null });
 	} catch (error) {
 		return NextResponse.json(
-			{ success: false, error: "Failed to delete goods procurement" },
+			{
+				success: false,
+				error:
+					error instanceof Error
+						? error.message
+						: "Failed to delete goods procurement",
+			},
 			{ status: 500 }
 		);
 	}

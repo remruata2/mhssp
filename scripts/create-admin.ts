@@ -1,31 +1,31 @@
-import dbConnect from '@/lib/mongodb';
-import User from '@/models/User';
+import dbConnect from "@/lib/db";
+import User from "@/models/User";
 
 async function createAdmin() {
-  try {
-    await dbConnect();
+	try {
+		await dbConnect();
 
-    // Check if admin already exists
-    const existingAdmin = await User.findOne({ username: 'admin@gmail.com' });
-    if (existingAdmin) {
-      console.log('Admin user already exists');
-      process.exit(0);
-    }
+		// Check if admin already exists
+		const existingAdmin = await User.findOne({ username: "admin@gmail.com" });
+		if (existingAdmin) {
+			console.log("Admin user already exists");
+			process.exit(0);
+		}
 
-    // Create admin user
-    await User.create({
-      username: 'admin@gmail.com',
-      password: 'admin123', // This will be hashed by the pre-save hook
-      role: 'admin',
-    });
+		// Create admin user
+		await User.create({
+			username: "admin@gmail.com",
+			password: "admin123", // This will be hashed by the pre-save hook
+			role: "admin",
+		});
 
-    console.log('Admin user created successfully');
-    console.log('\nPlease change the password after first login');
-  } catch (error) {
-    console.error('Error creating admin user:', error);
-  } finally {
-    process.exit(0);
-  }
+		console.log("Admin user created successfully");
+		console.log("\nPlease change the password after first login");
+	} catch {
+		console.error("Error creating admin user:");
+	} finally {
+		process.exit(0);
+	}
 }
 
 createAdmin();

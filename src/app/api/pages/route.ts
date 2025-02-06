@@ -3,14 +3,13 @@ import dbConnect from "@/lib/db";
 import { Page } from "@/models/Page";
 
 // Mock database (replace with actual database logic)
-let pages = [];
 
 export async function GET() {
 	try {
 		await dbConnect();
 		const pages = await Page.find().sort({ createdAt: -1 });
 		return NextResponse.json({ success: true, data: pages });
-	} catch (error) {
+	} catch {
 		return NextResponse.json(
 			{ success: false, error: "Failed to fetch pages" },
 			{ status: 500 }
@@ -43,7 +42,7 @@ export async function POST(request: NextRequest) {
 		});
 
 		return NextResponse.json({ success: true, data: page });
-	} catch (error) {
+	} catch {
 		return NextResponse.json(
 			{ success: false, error: "Failed to create page" },
 			{ status: 500 }

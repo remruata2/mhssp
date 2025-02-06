@@ -1,6 +1,6 @@
 // Updated /src/app/api/news/[id]/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import dbConnect from "@/lib/mongodb";
+import dbConnect from "@/lib/db";
 import News from "@/models/News";
 import fs from "fs/promises";
 import path from "path";
@@ -24,9 +24,10 @@ export async function GET(
 		}
 
 		return NextResponse.json({ success: true, data: news });
-	} catch (error) {
+	} catch (error: unknown) {
+		const err = error as Error & { errors?: Record<string, unknown> };
 		return NextResponse.json(
-			{ success: false, error: "Failed to fetch news" },
+			{ success: false, error: err.message || "Failed to fetch news" },
 			{ status: 500 }
 		);
 	}
@@ -67,9 +68,10 @@ export async function PUT(
 
 				await fs.writeFile(filePath, Buffer.from(buffer));
 				imageUrl = `/uploads/${filename}`;
-			} catch (error) {
+			} catch (error: unknown) {
+				const err = error as Error & { errors?: Record<string, unknown> };
 				return NextResponse.json(
-					{ success: false, error: "File upload failed" },
+					{ success: false, error: err.message || "File upload failed" },
 					{ status: 500 }
 				);
 			}
@@ -90,12 +92,13 @@ export async function PUT(
 		}
 
 		return NextResponse.json({ success: true, data: updatedNews });
-	} catch (error: any) {
+	} catch (error: unknown) {
+		const err = error as Error & { errors?: Record<string, unknown> };
 		return NextResponse.json(
 			{
 				success: false,
-				error: error.message || "Server error",
-				...(error.errors && { details: error.errors }),
+				error: err.message || "Server error",
+				...(err.errors && { details: err.errors }),
 			},
 			{ status: 500 }
 		);
@@ -107,9 +110,8 @@ export async function DELETE(
 	request: NextRequest,
 	{ params }: { params: { id: string } }
 ) {
-	await dbConnect();
-
 	try {
+		await dbConnect();
 		const deletedNews = await News.findByIdAndDelete(params.id);
 
 		if (!deletedNews) {
@@ -126,9 +128,10 @@ export async function DELETE(
 		}
 
 		return NextResponse.json({ success: true, data: deletedNews });
-	} catch (error: any) {
+	} catch (error: unknown) {
+		const err = error as Error & { errors?: Record<string, unknown> };
 		return NextResponse.json(
-			{ success: false, error: error.message || "Server error" },
+			{ success: false, error: err.message || "Server error" },
 			{ status: 500 }
 		);
 	}

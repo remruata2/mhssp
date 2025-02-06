@@ -11,7 +11,7 @@ export async function GET() {
 			.populate("contractor")
 			.sort({ createdAt: -1 });
 		return NextResponse.json({ success: true, data: consultancies });
-	} catch (error) {
+	} catch {
 		return NextResponse.json(
 			{ success: false, error: "Failed to fetch consultancies" },
 			{ status: 500 }

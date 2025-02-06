@@ -18,7 +18,7 @@ export async function GET(
 		}
 
 		return NextResponse.json({ success: true, data: category });
-	} catch (error) {
+	} catch {
 		return NextResponse.json(
 			{ success: false, error: "Failed to fetch category" },
 			{ status: 500 }
@@ -78,7 +78,7 @@ export async function DELETE(
 		}
 
 		return NextResponse.json({ success: true, data: {} });
-	} catch (error) {
+	} catch {
 		return NextResponse.json(
 			{ success: false, error: "Failed to delete category" },
 			{ status: 500 }

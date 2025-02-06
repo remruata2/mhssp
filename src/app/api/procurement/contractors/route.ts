@@ -7,7 +7,7 @@ export async function GET() {
 		await dbConnect();
 		const contractors = await Contractor.find({}).sort({ createdAt: -1 });
 		return NextResponse.json({ success: true, data: contractors });
-	} catch (error) {
+	} catch {
 		return NextResponse.json(
 			{ success: false, error: "Failed to fetch contractors" },
 			{ status: 500 }

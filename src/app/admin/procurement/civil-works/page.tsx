@@ -133,7 +133,7 @@ export default function CivilWorksPage() {
 			} else {
 				setError(data.error);
 			}
-		} catch (_error) {
+		} catch {
 			setError("Failed to save civil works procurement");
 		} finally {
 			setLoading(false);
@@ -160,7 +160,7 @@ export default function CivilWorksPage() {
 			} else {
 				setError(data.error);
 			}
-		} catch (_error) {
+		} catch {
 			setError("Failed to delete civil works procurement");
 		}
 	}

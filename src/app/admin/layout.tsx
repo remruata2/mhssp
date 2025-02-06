@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
@@ -24,6 +25,12 @@ export default function AdminLayout({
 	const router = useRouter();
 	const pathname = usePathname();
 
+	useEffect(() => {
+		if (status === "unauthenticated") {
+			router.push("/admin/login");
+		}
+	}, [status, router, session]);
+
 	// Don't show layout on login page
 	if (pathname === "/admin/login") {
 		return <>{children}</>;
@@ -32,12 +39,6 @@ export default function AdminLayout({
 	// Show loading state
 	if (status === "loading") {
 		return <div>Loading...</div>;
-	}
-
-	// Redirect if not authenticated
-	if (status === "unauthenticated") {
-		router.push("/admin/login");
-		return null;
 	}
 
 	return (
