@@ -3,96 +3,201 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+	--background: #ffffff;
+	--foreground: #171717;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+	:root {
+		--background: #0a0a0a;
+		--foreground: #ededed;
+	}
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+	color: var(--foreground);
+	background: var(--background);
+	font-family: Arial, Helvetica, sans-serif;
 }
 
 @layer components {
-  .form-input {
-    @apply mt-1 block w-full rounded-md border-indigo-300 border px-4 py-2 text-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none caret-indigo-500 text-gray-900;
-  }
+	.form-input {
+		@apply mt-1 block w-full rounded-md border-indigo-300 border px-4 py-2 text-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none caret-indigo-500 text-gray-900;
+	}
 
-  .form-textarea {
-    @apply mt-1 block w-full rounded-md border-indigo-300 border px-4 py-2 text-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none caret-indigo-500 text-gray-900;
-  }
+	.form-textarea {
+		@apply mt-1 block w-full rounded-md border-indigo-300 border px-4 py-2 text-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none caret-indigo-500 text-gray-900;
+	}
 
-  .form-select {
-    @apply mt-1 block w-full rounded-md border-indigo-300 border px-4 py-2 text-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none text-gray-900;
-  }
+	.form-select {
+		@apply mt-1 block w-full rounded-md border-indigo-300 border px-4 py-2 text-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none text-gray-900;
+	}
 
-  .form-label {
-    @apply block text-sm font-medium text-gray-700;
-  }
+	.form-label {
+		@apply block text-sm font-medium text-gray-700;
+	}
 
-  /* Table styles for better visibility */
-  table {
-    @apply w-full border-collapse;
-  }
+	/* Table styles for better visibility */
+	table {
+		@apply w-full border-collapse;
+	}
 
-  thead th {
-    @apply bg-gray-50 text-gray-900 font-semibold;
-  }
+	thead th {
+		@apply bg-gray-50 text-gray-900 font-semibold;
+	}
 
-  tbody td {
-    @apply text-gray-900;
-  }
+	tbody td {
+		@apply text-gray-900;
+	}
 
-  td .text-sm,
-  th .text-xs {
-    @apply text-gray-900;
-  }
+	td .text-sm,
+	th .text-xs {
+		@apply text-gray-900;
+	}
 
-  /* Preserve specific colored text */
-  .text-blue-600 {
-    @apply text-opacity-100;
-  }
+	/* Preserve specific colored text */
+	.text-blue-600 {
+		@apply text-opacity-100;
+	}
 
-  .text-red-600 {
-    @apply text-opacity-100;
-  }
+	.text-red-600 {
+		@apply text-opacity-100;
+	}
 
-  .text-green-800,
-  .text-yellow-800 {
-    @apply text-opacity-100;
-  }
-}
+	.text-green-800,
+	.text-yellow-800 {
+		@apply text-opacity-100;
+	}
 
-@keyframes blob {
-  0% {
-    transform: translate(0px, 0px) scale(1);
-  }
-  33% {
-    transform: translate(30px, -50px) scale(1.1);
-  }
-  66% {
-    transform: translate(-20px, 20px) scale(0.9);
-  }
-  100% {
-    transform: translate(0px, 0px) scale(1);
-  }
-}
+	.gradient-bg {
+		@apply absolute inset-0 -z-10 bg-gradient-to-l from-[#f5f7fa] to-[#c3cfe2];
+	}
 
-.animate-blob {
-  animation: blob 7s infinite;
-}
+	.animated-circle {
+		@apply absolute block list-none bg-blue-600/70;
+		animation: float 25s linear infinite;
+		top: 150px;
+		width: 40px;
+		height: 40px;
+		border-radius: 4px;
+	}
 
-.animation-delay-2000 {
-  animation-delay: 2s;
-}
+	@keyframes float {
+		0% {
+			transform: translate(-100%, -150%) rotate(0deg);
+			opacity: 1;
+		}
+		50% {
+			transform: translate(50vw, 100%) rotate(360deg);
+			opacity: 0.7;
+		}
+		100% {
+			transform: translate(100vw, -50%) rotate(720deg);
+			opacity: 0;
+		}
+	}
 
-.animation-delay-4000 {
-  animation-delay: 4s;
+	@keyframes blob {
+		0% {
+			transform: translate(0px, 0px) scale(1);
+		}
+		33% {
+			transform: translate(30px, -50px) scale(1.1);
+		}
+		66% {
+			transform: translate(-20px, 20px) scale(0.9);
+		}
+		100% {
+			transform: translate(0px, 0px) scale(1);
+		}
+	}
+
+	.animate-blob {
+		animation: blob 7s infinite;
+	}
+
+	.animation-delay-2000 {
+		animation-delay: 2s;
+	}
+
+	.animation-delay-4000 {
+		animation-delay: 4s;
+	}
+
+	.ripple-background {
+		@apply absolute inset-0 overflow-hidden;
+	}
+
+	.ripple-circle {
+		@apply absolute rounded-full bg-white;
+		animation: ripple 15s infinite;
+		box-shadow: 0px 0px 1px 0px #508fb9;
+	}
+
+	.ripple-small {
+		width: 200px;
+		height: 200px;
+		left: -100px;
+		top: 500px;
+	}
+
+	.ripple-medium {
+		width: 400px;
+		height: 400px;
+		left: -200px;
+		top: 400px;
+	}
+
+	.ripple-large {
+		width: 600px;
+		height: 600px;
+		left: -300px;
+		top: 300px;
+	}
+
+	.ripple-xlarge {
+		width: 800px;
+		height: 800px;
+		left: -400px;
+		top: 200px;
+	}
+
+	.ripple-xxlarge {
+		width: 1000px;
+		height: 1000px;
+		left: -500px;
+		top: 100px;
+	}
+
+	.ripple-shade1 {
+		opacity: 0.2;
+	}
+
+	.ripple-shade2 {
+		opacity: 0.5;
+	}
+
+	.ripple-shade3 {
+		opacity: 0.7;
+	}
+
+	.ripple-shade4 {
+		opacity: 0.8;
+	}
+
+	.ripple-shade5 {
+		opacity: 0.9;
+	}
+
+	@keyframes ripple {
+		0% {
+			transform: scale(0.8);
+		}
+		50% {
+			transform: scale(1.2);
+		}
+		100% {
+			transform: scale(0.8);
+		}
+	}
 }

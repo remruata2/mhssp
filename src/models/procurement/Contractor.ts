@@ -15,7 +15,7 @@ const contractorSchema = new mongoose.Schema<IContractor>(
       type: String, 
       required: [true, 'Please provide a contractor name'],
       trim: true,
-      unique: true,
+      index: { unique: true },
       minlength: [2, 'Contractor name must be at least 2 characters long'],
       maxlength: [100, 'Contractor name cannot exceed 100 characters']
     },
@@ -23,6 +23,8 @@ const contractorSchema = new mongoose.Schema<IContractor>(
       type: String,
       trim: true,
       lowercase: true,
+      index: true,
+      sparse: true,
       match: [
         /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/,
         'Please provide a valid email address'
@@ -46,10 +48,6 @@ const contractorSchema = new mongoose.Schema<IContractor>(
     timestamps: true
   }
 );
-
-// Create indexes for better query performance
-contractorSchema.index({ name: 1 });
-contractorSchema.index({ email: 1 });
 
 // Pre-save middleware
 contractorSchema.pre('save', function(next) {

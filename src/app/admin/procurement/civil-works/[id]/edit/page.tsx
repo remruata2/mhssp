@@ -37,7 +37,7 @@ export default function EditCivilWorkPage({ params }: { params: { id: string } }
     Promise.all([fetchCivilWork(), fetchContractors()]).finally(() => 
       setLoading(false)
     );
-  }, []);
+  }, [fetchCivilWork, fetchContractors]);
 
   async function fetchCivilWork() {
     try {

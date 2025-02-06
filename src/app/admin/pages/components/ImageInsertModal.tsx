@@ -31,7 +31,7 @@ export default function ImageInsertModal({ onClose, onInsert }: ImageInsertModal
       formData.append('file', file);
 
       // Upload to your server endpoint
-      const response = await fetch('/api/upload', {
+      const response = await fetch('/api/uploads', {
         method: 'POST',
         body: formData,
       });

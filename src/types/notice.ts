@@ -23,6 +23,7 @@ export interface SubNotice {
   description?: string;
   createdAt?: string;
   updatedAt?: string;
+  order: number;
 }
 
 export interface SubNoticeFormData {
@@ -30,4 +31,6 @@ export interface SubNoticeFormData {
   documentUrl: string;
   referenceNumber?: string;
   description?: string;
+  id?: string;
+  file: File | null;
 }

@@ -32,9 +32,6 @@ const goodsCategorySchema = new mongoose.Schema<IGoodsCategory>(
   }
 );
 
-// Create indexes for better query performance
-goodsCategorySchema.index({ name: 1 });
-
 // Virtual for total items in this category
 goodsCategorySchema.virtual('totalItems', {
   ref: 'GoodsProcurement',

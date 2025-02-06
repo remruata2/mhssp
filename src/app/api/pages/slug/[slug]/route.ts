@@ -1,14 +1,20 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import dbConnect from '@/lib/db';
 import { Page } from '@/models/Page';
 
+interface RouteParams {
+  params: {
+    slug: string;
+  };
+}
+
 export async function GET(
-  request: Request,
-  context: { params: Promise<{ slug: string }> }
+  request: NextRequest,
+  context: RouteParams
 ) {
   try {
     await dbConnect();
-    const { slug } = await context.params;
+    const { slug } = context.params;
     
     // Only fetch published pages for the frontend
     const page = await Page.findOne({ 

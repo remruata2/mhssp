@@ -2,16 +2,24 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import { SubNotice } from '@/models/SubNotice';
 
+interface RouteParams {
+  params: {
+    id: string;
+    subnoticeId: string;
+  };
+}
+
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string; subnoticeId: string } }
+  context: RouteParams
 ) {
   try {
     await dbConnect();
     
+    const { id, subnoticeId } = context.params;
     const subNotice = await SubNotice.findOneAndDelete({
-      _id: params.subnoticeId,
-      noticeId: params.id,
+      _id: subnoticeId,
+      noticeId: id,
     });
 
     if (!subNotice) {

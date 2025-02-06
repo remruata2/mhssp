@@ -11,7 +11,7 @@ import {
   FaLink,
 } from "react-icons/fa";
 import SlideOver from "@/components/SlideOver";
-import { Notice, SubNoticeFormData } from "@/types/notice";
+import { Notice, SubNotice, SubNoticeFormData } from "@/types/notice";
 
 interface FormData {
   title: string;
@@ -282,7 +282,7 @@ export default function NoticesPage() {
       // Handle sub notices
       if (formData.type === "subNotices" && currentSubNotices.length > 0) {
         currentSubNotices.forEach((subNotice, index) => {
-          formDataToSend.append(`subNotices[${index}][id]`, subNotice.id);
+          formDataToSend.append(`subNotices[${index}][id]`, subNotice.id || '');
           formDataToSend.append(`subNotices[${index}][title]`, subNotice.title);
           if (subNotice.file) {
             formDataToSend.append(`subNotices[${index}][file]`, subNotice.file);

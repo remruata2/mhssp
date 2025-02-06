@@ -1,14 +1,18 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import ConsultancyProcurement from '@/models/procurement/ConsultancyProcurement';
 
-export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+interface RouteParams {
+  params: {
+    id: string;
+  };
+}
+
+export async function GET(request: NextRequest, context: RouteParams) {
   try {
+    const { id } = context.params;
     await dbConnect();
-    const consultancy = await ConsultancyProcurement.findById(params.id).populate('contractor');
+    const consultancy = await ConsultancyProcurement.findById(id).populate('contractor');
     
     if (!consultancy) {
       return NextResponse.json(
@@ -26,16 +30,13 @@ export async function GET(
   }
 }
 
-export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, context: RouteParams) {
   try {
     const body = await request.json();
     await dbConnect();
 
     const consultancy = await ConsultancyProcurement.findByIdAndUpdate(
-      params.id,
+      context.params.id,
       { $set: body },
       { new: true, runValidators: true }
     ).populate('contractor');
@@ -62,13 +63,11 @@ export async function PUT(
   }
 }
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, context: RouteParams) {
   try {
+    const { id } = context.params;
     await dbConnect();
-    const consultancy = await ConsultancyProcurement.findByIdAndDelete(params.id);
+    const consultancy = await ConsultancyProcurement.findByIdAndDelete(id);
 
     if (!consultancy) {
       return NextResponse.json(

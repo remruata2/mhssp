@@ -1,14 +1,18 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import dbConnect from '@/lib/db';
 import CivilWork from '@/models/procurement/CivilWorksProcurement';
 
-export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+interface RouteParams {
+  params: {
+    id: string;
+  };
+}
+
+export async function GET(request: NextRequest, context: RouteParams) {
   try {
     await dbConnect();
-    const civilWork = await CivilWork.findById(params.id).populate('contractor');
+    const { id } = context.params;
+    const civilWork = await CivilWork.findById(id).populate('contractor');
     
     if (!civilWork) {
       return NextResponse.json(
@@ -26,16 +30,14 @@ export async function GET(
   }
 }
 
-export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, context: RouteParams) {
   try {
     const body = await request.json();
     await dbConnect();
 
+    const { id } = context.params;
     const civilWork = await CivilWork.findByIdAndUpdate(
-      params.id,
+      id,
       { $set: body },
       { new: true, runValidators: true }
     ).populate('contractor');
@@ -62,13 +64,11 @@ export async function PUT(
   }
 }
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, context: RouteParams) {
   try {
     await dbConnect();
-    const civilWork = await CivilWork.findByIdAndDelete(params.id);
+    const { id } = context.params;
+    const civilWork = await CivilWork.findByIdAndDelete(id);
 
     if (!civilWork) {
       return NextResponse.json(

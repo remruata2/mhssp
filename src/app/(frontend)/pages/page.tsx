@@ -1,8 +1,15 @@
 import Link from 'next/link';
 import { headers } from 'next/headers';
 
+interface Page {
+  _id: string;
+  slug: string;
+  title: string;
+  isPublished: boolean;
+}
+
 async function getPages() {
-  const headersList = headers();
+  const headersList = await headers();
   const host = headersList.get('host');
   const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https';
 
@@ -15,7 +22,7 @@ async function getPages() {
   }
   
   const data = await res.json();
-  return data.success ? data.data.filter((page: any) => page.isPublished) : [];
+  return data.success ? data.data.filter((page: Page) => page.isPublished) : [];
 }
 
 export default async function PagesIndex() {
@@ -25,7 +32,7 @@ export default async function PagesIndex() {
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8">Pages</h1>
       <div className="grid gap-6">
-        {pages.map((page: any) => (
+        {pages.map((page: Page) => (
           <Link
             key={page._id}
             href={`/pages/${page.slug}`}

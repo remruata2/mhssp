@@ -1,44 +1,50 @@
-import { NextResponse } from 'next/server';
-import dbConnect from '@/lib/db';
-import { Page } from '@/models/Page';
+import { NextResponse, NextRequest } from "next/server";
+import dbConnect from "@/lib/db";
+import { Page } from "@/models/Page";
+
+type RouteParams = {
+  params: {
+    id: string;
+  };
+};
 
 export async function GET(
-  request: Request,
-  context: { params: Promise<{ id: string }> }
+  request: NextRequest,
+  context: RouteParams
 ) {
   try {
     await dbConnect();
-    const { id } = await context.params;
+    const { id } = context.params;
     const page = await Page.findById(id);
-    
+
     if (!page) {
       return NextResponse.json(
-        { success: false, error: 'Page not found' },
+        { success: false, error: "Page not found" },
         { status: 404 }
       );
     }
 
     return NextResponse.json({ success: true, data: page });
   } catch (error) {
-    console.error('Error fetching page:', error);
+    console.error("Error fetching page:", error);
     return NextResponse.json(
-      { success: false, error: 'Error fetching page' },
+      { success: false, error: "Error fetching page" },
       { status: 500 }
     );
   }
 }
 
 export async function PUT(
-  request: Request,
-  context: { params: Promise<{ id: string }> }
+  request: NextRequest,
+  context: RouteParams
 ) {
   try {
     await dbConnect();
-    const { id } = await context.params;
+    const { id } = context.params;
     const data = await request.json();
-    
+
     // If publishing/unpublishing, update the publishedAt date
-    if ('isPublished' in data) {
+    if ("isPublished" in data) {
       data.publishedAt = data.isPublished ? new Date() : null;
     }
 
@@ -50,42 +56,42 @@ export async function PUT(
 
     if (!page) {
       return NextResponse.json(
-        { success: false, error: 'Page not found' },
+        { success: false, error: "Page not found" },
         { status: 404 }
       );
     }
 
     return NextResponse.json({ success: true, data: page });
   } catch (error) {
-    console.error('Error updating page:', error);
+    console.error("Error updating page:", error);
     return NextResponse.json(
-      { success: false, error: 'Error updating page' },
+      { success: false, error: "Error updating page" },
       { status: 500 }
     );
   }
 }
 
 export async function DELETE(
-  request: Request,
-  context: { params: Promise<{ id: string }> }
+  request: NextRequest,
+  context: RouteParams
 ) {
   try {
     await dbConnect();
-    const { id } = await context.params;
+    const { id } = context.params;
     const page = await Page.findByIdAndDelete(id);
 
     if (!page) {
       return NextResponse.json(
-        { success: false, error: 'Page not found' },
+        { success: false, error: "Page not found" },
         { status: 404 }
       );
     }
 
     return NextResponse.json({ success: true, data: page });
   } catch (error) {
-    console.error('Error deleting page:', error);
+    console.error("Error deleting page:", error);
     return NextResponse.json(
-      { success: false, error: 'Error deleting page' },
+      { success: false, error: "Error deleting page" },
       { status: 500 }
     );
   }

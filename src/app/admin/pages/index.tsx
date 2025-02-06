@@ -4,7 +4,7 @@ const AddPage = () => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     // Logic to save the page data goes here
     console.log('Page added:', { title, content });
