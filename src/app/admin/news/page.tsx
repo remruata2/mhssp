@@ -206,7 +206,7 @@ export default function NewsAdmin() {
 				<h1 className="text-2xl font-bold text-gray-800">Manage News</h1>
 				<button
 					onClick={handleAdd}
-					className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 flex items-center gap-2"
+					className="bg-[#1192c3] text-white px-4 py-2 rounded-md hover:bg-indigo-700 flex items-center gap-2"
 				>
 					<FaPlus className="h-4 w-4" />
 					Add News
@@ -400,7 +400,7 @@ export default function NewsAdmin() {
 						<button
 							type="submit"
 							disabled={isLoading}
-							className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
+							className="px-4 py-2 bg-[#1192c3] text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
 						>
 							{isLoading ? (
 								<span className="flex items-center gap-2">

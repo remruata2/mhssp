@@ -2,8 +2,13 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import PageTitle from "@/components/ui/PageTitle";
-import Image from 'next/image';
-import { FaRulerCombined, FaCalendarAlt, FaUserTie, FaMoneyBill } from "react-icons/fa";
+import Image from "next/image";
+import {
+	FaRulerCombined,
+	FaCalendarAlt,
+	FaUserTie,
+	FaMoneyBill,
+} from "react-icons/fa";
 
 interface TechnicalReport {
 	id: string;
@@ -184,8 +189,8 @@ const InfrastructurePage = () => {
 			imageUrl: "/images/new-hospital.jpg",
 			generalInformation: {
 				name: "Strengthening & Upgradation of Mizoram College of Nursing (MCON)",
-				contractor: "Lushai Media.",
-				contractAmount: "₹5.73 Crores",
+				contractor: "M/s Lalnunmawia",
+				contractAmount: "₹6.49 Crores",
 				commencedDate: "4 November 2024",
 			},
 			area: { total: "4500 sqm" },
@@ -194,37 +199,24 @@ const InfrastructurePage = () => {
 			id: "ongoing-2",
 			status: "ongoing",
 			title: "Civil Hospital, Lunglei",
-			imageUrl: "/images/new-hospital.jpg",
+			imageUrl: "/images/lunglei.jpg",
 			generalInformation: {
 				name: "Repair & Renovation of Civil Hospital, Lunglei",
-				contractor: "Lushai Media.",
-				contractAmount: "₹3.52 Crores",
+				contractor: "Brilliant Consultancy",
+				contractAmount: "₹4.59 Crores",
 				commencedDate: "4 August 2024",
-			},
-			area: { total: "4500 sqm" },
-		},
-		{
-			id: "ongoing-3",
-			status: "ongoing",
-			title: "MCON",
-			imageUrl: "/images/new-hospital.jpg",
-			generalInformation: {
-				name: "Strengthening & Upgradation of Mizoram College of Nursing (MCON)",
-				contractor: "Lushai Media.",
-				contractAmount: "₹5.73 Crores",
-				commencedDate: "4 November 2024",
 			},
 			area: { total: "4500 sqm" },
 		},
 		{
 			id: "ongoing-4",
 			status: "ongoing",
-			title: "Civil Hospital, Siaha",
-			imageUrl: "/images/new-hospital.jpg",
+			title: "Siaha District Hospital",
+			imageUrl: "/images/siaha.jpg",
 			generalInformation: {
-				name: "Repair & Renovation of Civil Hospital, Siaha",
-				contractor: "Lushai Media.",
-				contractAmount: "₹2.26 Crores",
+				name: "Repair & Renovation of Siaha District Hospital",
+				contractor: "Zamzo Engineering Construction & Consultancy",
+				contractAmount: "₹2.51 Crores",
 				commencedDate: "5 August 2024",
 			},
 			area: { total: "4500 sqm" },
@@ -232,12 +224,12 @@ const InfrastructurePage = () => {
 		{
 			id: "ongoing-5",
 			status: "ongoing",
-			title: "Civil Hospital, Champhai",
-			imageUrl: "/images/new-hospital.jpg",
+			title: "Champhai District Hospital",
+			imageUrl: "/images/champhai.jpg",
 			generalInformation: {
-				name: "Repair & Renovation of Civil Hospital, Champhai",
-				contractor: "Lushai Media.",
-				contractAmount: "₹1.76 Crores",
+				name: "Repair & Renovation of Champhai District Hospital",
+				contractor: "M/s F Sangkunga",
+				contractAmount: "₹2.22 Crores",
 				commencedDate: "25 March 2024",
 			},
 			area: { total: "4500 sqm" },
@@ -245,25 +237,12 @@ const InfrastructurePage = () => {
 		{
 			id: "ongoing-6",
 			status: "ongoing",
-			title: "Civil Hospital, Lawngtlai",
+			title: "Lawngtlai District Hospital",
 			imageUrl: "/images/new-hospital.jpg",
 			generalInformation: {
-				name: "Repair & Renovation of Civil Hospital, Lawngtlai",
-				contractor: "Lushai Media.",
-				contractAmount: "₹1.03 Crores",
-				commencedDate: "25 March 2023",
-			},
-			area: { total: "4500 sqm" },
-		},
-		{
-			id: "ongoing-7",
-			status: "ongoing",
-			title: "Civil Hospital, Lawngtlai",
-			imageUrl: "/images/new-hospital.jpg",
-			generalInformation: {
-				name: "Repair & Renovation of Civil Hospital, Lawngtlai",
-				contractor: "Lushai Media.",
-				contractAmount: "₹1.03 Crores",
+				name: "Repair & Renovation of Lawngtlai District Hospital",
+				contractor: "MW Venture",
+				contractAmount: "₹2.53 Crores",
 				commencedDate: "25 March 2023",
 			},
 			area: { total: "4500 sqm" },
@@ -275,8 +254,34 @@ const InfrastructurePage = () => {
 			imageUrl: "/images/new-hospital.jpg",
 			generalInformation: {
 				name: "Construction of Emergency Staircase and Lift Shaft at CMO, Hnahthial",
-				contractor: "Lushai Media.",
-				contractAmount: "₹1.03 Crores",
+				contractor: "Babie Construction & Consultancy Services",
+				contractAmount: "₹1.09 Crores",
+				commencedDate: "25 March 2023",
+			},
+			area: { total: "4500 sqm" },
+		},
+		{
+			id: "ongoing-8",
+			status: "ongoing",
+			title: "CMO Office, Saitual",
+			imageUrl: "/images/new-hospital.jpg",
+			generalInformation: {
+				name: "Construction of Emergency Staircase and Lift Shaft at CMO, Saitual",
+				contractor: "Babie Construction & Consultancy Services",
+				contractAmount: "₹1.06 Crores",
+				commencedDate: "25 March 2023",
+			},
+			area: { total: "4500 sqm" },
+		},
+		{
+			id: "ongoing-8",
+			status: "ongoing",
+			title: "CMO Office, Khawzawl",
+			imageUrl: "/images/new-hospital.jpg",
+			generalInformation: {
+				name: "Construction of Emergency Staircase and Lift Shaft at CMO, Khawzawl",
+				contractor: "Creative Minds",
+				contractAmount: "₹0.88 Crores",
 				commencedDate: "25 March 2023",
 			},
 			area: { total: "4500 sqm" },
