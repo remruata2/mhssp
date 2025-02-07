@@ -186,7 +186,7 @@ const InfrastructurePage = () => {
 			id: "ongoing-1",
 			status: "ongoing",
 			title: "MCON",
-			imageUrl: "/images/new-hospital.jpg",
+			imageUrl: "/images/MCON.jpeg",
 			generalInformation: {
 				name: "Strengthening & Upgradation of Mizoram College of Nursing (MCON)",
 				contractor: "M/s Lalnunmawia",
@@ -212,7 +212,7 @@ const InfrastructurePage = () => {
 			id: "ongoing-3",
 			status: "ongoing",
 			title: "Siaha District Hospital",
-			imageUrl: "/images/siaha.jpeg",
+			imageUrl: "/images/siaha1.png",
 			generalInformation: {
 				name: "Repair & Renovation of Siaha District Hospital",
 				contractor: "Zamzo Engineering Construction & Consultancy",
@@ -238,7 +238,7 @@ const InfrastructurePage = () => {
 			id: "ongoing-5",
 			status: "ongoing",
 			title: "Lawngtlai District Hospital",
-			imageUrl: "/images/new-hospital.jpg",
+			imageUrl: "/images/lawngtlai.jpeg",
 			generalInformation: {
 				name: "Repair & Renovation of Lawngtlai District Hospital",
 				contractor: "MW Venture",
@@ -251,7 +251,7 @@ const InfrastructurePage = () => {
 			id: "ongoing-6",
 			status: "ongoing",
 			title: "CMO Office, Hnahthial",
-			imageUrl: "/images/new-hospital.jpg",
+			imageUrl: "/images/hnahthial2.jpg",
 			generalInformation: {
 				name: "Construction of Emergency Staircase and Lift Shaft at CMO, Hnahthial",
 				contractor: "Babie Construction & Consultancy Services",
@@ -264,7 +264,7 @@ const InfrastructurePage = () => {
 			id: "ongoing-7",
 			status: "ongoing",
 			title: "CMO Office, Saitual",
-			imageUrl: "/images/new-hospital.jpg",
+			imageUrl: "/images/saitual.png",
 			generalInformation: {
 				name: "Construction of Emergency Staircase and Lift Shaft at CMO, Saitual",
 				contractor: "Babie Construction & Consultancy Services",
@@ -277,7 +277,7 @@ const InfrastructurePage = () => {
 			id: "ongoing-8",
 			status: "ongoing",
 			title: "CMO Office, Khawzawl",
-			imageUrl: "/images/new-hospital.jpg",
+			imageUrl: "/images/khawzawl.png",
 			generalInformation: {
 				name: "Construction of Emergency Staircase and Lift Shaft at CMO, Khawzawl",
 				contractor: "Creative Minds",
