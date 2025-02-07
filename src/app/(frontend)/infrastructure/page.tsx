@@ -199,7 +199,7 @@ const InfrastructurePage = () => {
 			id: "ongoing-2",
 			status: "ongoing",
 			title: "Civil Hospital, Lunglei",
-			imageUrl: "/images/lunglei.jpg",
+			imageUrl: "/images/lunglei.jpeg",
 			generalInformation: {
 				name: "Repair & Renovation of Civil Hospital, Lunglei",
 				contractor: "Brilliant Consultancy",
@@ -209,10 +209,10 @@ const InfrastructurePage = () => {
 			area: { total: "4500 sqm" },
 		},
 		{
-			id: "ongoing-4",
+			id: "ongoing-3",
 			status: "ongoing",
 			title: "Siaha District Hospital",
-			imageUrl: "/images/siaha.jpg",
+			imageUrl: "/images/siaha.jpeg",
 			generalInformation: {
 				name: "Repair & Renovation of Siaha District Hospital",
 				contractor: "Zamzo Engineering Construction & Consultancy",
@@ -222,10 +222,10 @@ const InfrastructurePage = () => {
 			area: { total: "4500 sqm" },
 		},
 		{
-			id: "ongoing-5",
+			id: "ongoing-4",
 			status: "ongoing",
 			title: "Champhai District Hospital",
-			imageUrl: "/images/champhai.jpg",
+			imageUrl: "/images/champhai.jpeg",
 			generalInformation: {
 				name: "Repair & Renovation of Champhai District Hospital",
 				contractor: "M/s F Sangkunga",
@@ -235,7 +235,7 @@ const InfrastructurePage = () => {
 			area: { total: "4500 sqm" },
 		},
 		{
-			id: "ongoing-6",
+			id: "ongoing-5",
 			status: "ongoing",
 			title: "Lawngtlai District Hospital",
 			imageUrl: "/images/new-hospital.jpg",
@@ -248,7 +248,7 @@ const InfrastructurePage = () => {
 			area: { total: "4500 sqm" },
 		},
 		{
-			id: "ongoing-8",
+			id: "ongoing-6",
 			status: "ongoing",
 			title: "CMO Office, Hnahthial",
 			imageUrl: "/images/new-hospital.jpg",
@@ -261,7 +261,7 @@ const InfrastructurePage = () => {
 			area: { total: "4500 sqm" },
 		},
 		{
-			id: "ongoing-8",
+			id: "ongoing-7",
 			status: "ongoing",
 			title: "CMO Office, Saitual",
 			imageUrl: "/images/new-hospital.jpg",
