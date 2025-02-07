@@ -1,17 +1,17 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 import dbConnect from "@/lib/db";
 import ConsultancyProcurement from "@/models/procurement/ConsultancyProcurement";
 
-interface RouteParams {
-	params: {
-		id: string;
-	};
+interface Context {
+	params: Promise<{ id: string }>;
 }
 
-export async function GET(request: NextRequest, context: RouteParams) {
+export async function GET(request: NextRequest, context: Context) {
 	try {
-		const { id } = context.params;
 		await dbConnect();
+		const { id } = await context.params;
+
 		const consultancy = await ConsultancyProcurement.findById(id).populate(
 			"contractor"
 		);
@@ -24,21 +24,23 @@ export async function GET(request: NextRequest, context: RouteParams) {
 		}
 
 		return NextResponse.json({ success: true, data: consultancy });
-	} catch {
+	} catch (error) {
+		console.error("Error fetching consultancy:", error);
 		return NextResponse.json(
-			{ success: false, error: "Failed to fetch consultancy" },
+			{ success: false, error: "Internal server error" },
 			{ status: 500 }
 		);
 	}
 }
 
-export async function PUT(request: NextRequest, context: RouteParams) {
+export async function PUT(request: NextRequest, context: Context) {
 	try {
-		const body = await request.json();
 		await dbConnect();
+		const { id } = await context.params;
+		const body = await request.json();
 
 		const consultancy = await ConsultancyProcurement.findByIdAndUpdate(
-			context.params.id,
+			id,
 			{ $set: body },
 			{ new: true, runValidators: true }
 		).populate("contractor");
@@ -51,27 +53,20 @@ export async function PUT(request: NextRequest, context: RouteParams) {
 		}
 
 		return NextResponse.json({ success: true, data: consultancy });
-	} catch (error: any) {
-		if (error.code === 11000) {
-			return NextResponse.json(
-				{ success: false, error: "Reference number already exists" },
-				{ status: 400 }
-			);
-		}
+	} catch (error) {
+		console.error("Error updating consultancy:", error);
 		return NextResponse.json(
-			{
-				success: false,
-				error: error.message || "Failed to update consultancy",
-			},
+			{ success: false, error: "Internal server error" },
 			{ status: 500 }
 		);
 	}
 }
 
-export async function DELETE(request: NextRequest, context: RouteParams) {
+export async function DELETE(request: NextRequest, context: Context) {
 	try {
-		const { id } = context.params;
 		await dbConnect();
+		const { id } = await context.params;
+
 		const consultancy = await ConsultancyProcurement.findByIdAndDelete(id);
 
 		if (!consultancy) {
@@ -81,10 +76,11 @@ export async function DELETE(request: NextRequest, context: RouteParams) {
 			);
 		}
 
-		return NextResponse.json({ success: true, data: {} });
-	} catch {
+		return NextResponse.json({ success: true, data: consultancy });
+	} catch (error) {
+		console.error("Error deleting consultancy:", error);
 		return NextResponse.json(
-			{ success: false, error: "Failed to delete consultancy" },
+			{ success: false, error: "Internal server error" },
 			{ status: 500 }
 		);
 	}

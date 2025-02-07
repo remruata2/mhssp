@@ -1,17 +1,17 @@
-import { NextResponse, NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 import dbConnect from "@/lib/db";
 import CivilWork from "@/models/procurement/CivilWorksProcurement";
 
-interface RouteParams {
-	params: {
-		id: string;
-	};
+interface Context {
+	params: Promise<{ id: string }>;
 }
 
-export async function GET(request: NextRequest, context: RouteParams) {
+export async function GET(request: NextRequest, context: Context) {
 	try {
 		await dbConnect();
-		const { id } = context.params;
+		const { id } = await context.params;
+
 		const civilWork = await CivilWork.findById(id).populate("contractor");
 
 		if (!civilWork) {
@@ -22,20 +22,21 @@ export async function GET(request: NextRequest, context: RouteParams) {
 		}
 
 		return NextResponse.json({ success: true, data: civilWork });
-	} catch {
+	} catch (error) {
+		console.error("Error fetching civil work:", error);
 		return NextResponse.json(
-			{ success: false, error: "Failed to fetch civil work" },
+			{ success: false, error: "Internal server error" },
 			{ status: 500 }
 		);
 	}
 }
 
-export async function PUT(request: NextRequest, context: RouteParams) {
+export async function PUT(request: NextRequest, context: Context) {
 	try {
-		const body = await request.json();
 		await dbConnect();
+		const { id } = await context.params;
+		const body = await request.json();
 
-		const { id } = context.params;
 		const civilWork = await CivilWork.findByIdAndUpdate(
 			id,
 			{ $set: body },
@@ -50,27 +51,23 @@ export async function PUT(request: NextRequest, context: RouteParams) {
 		}
 
 		return NextResponse.json({ success: true, data: civilWork });
-	} catch (error: any) {
-		if (error.code === 11000) {
+	} catch (error: unknown) {
+		if (error instanceof Error) {
+			console.error("Error updating civil work:", error);
+
 			return NextResponse.json(
-				{
-					success: false,
-					error: "Lot number or contract number already exists",
-				},
-				{ status: 400 }
+				{ success: false, error: error.message },
+				{ status: 500 }
 			);
 		}
-		return NextResponse.json(
-			{ success: false, error: error.message || "Failed to update civil work" },
-			{ status: 500 }
-		);
 	}
 }
 
-export async function DELETE(request: NextRequest, context: RouteParams) {
+export async function DELETE(request: NextRequest, context: Context) {
 	try {
 		await dbConnect();
-		const { id } = context.params;
+		const { id } = await context.params;
+
 		const civilWork = await CivilWork.findByIdAndDelete(id);
 
 		if (!civilWork) {
@@ -80,11 +77,14 @@ export async function DELETE(request: NextRequest, context: RouteParams) {
 			);
 		}
 
-		return NextResponse.json({ success: true, data: {} });
-	} catch {
-		return NextResponse.json(
-			{ success: false, error: "Failed to delete civil work" },
-			{ status: 500 }
-		);
+		return NextResponse.json({ success: true, data: civilWork });
+	} catch (error: unknown) {
+		if (error instanceof Error) {
+			console.error("Error deleting civil work:", error);
+			return NextResponse.json(
+				{ success: false, error: error.message },
+				{ status: 500 }
+			);
+		}
 	}
 }

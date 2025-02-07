@@ -1,19 +1,17 @@
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 import dbConnect from "@/lib/db";
 import { SubNotice } from "@/models/SubNotice";
 
-interface RouteParams {
-	params: {
-		id: string;
-		subnoticeId: string;
-	};
+interface Context {
+	params: Promise<{ id: string; subnoticeId: string }>;
 }
 
-export async function DELETE(request: Request, context: RouteParams) {
+export async function DELETE(request: NextRequest, context: Context) {
 	try {
 		await dbConnect();
+		const { id, subnoticeId } = await context.params;
 
-		const { id, subnoticeId } = context.params;
 		const subNotice = await SubNotice.findOneAndDelete({
 			_id: subnoticeId,
 			noticeId: id,
@@ -27,10 +25,11 @@ export async function DELETE(request: Request, context: RouteParams) {
 		}
 
 		return NextResponse.json({ success: true, data: subNotice });
-	} catch (error: any) {
+	} catch (error) {
+		console.error("Error deleting subnotice:", error);
 		return NextResponse.json(
-			{ success: false, error: error.message },
-			{ status: 400 }
+			{ success: false, error: "Internal server error" },
+			{ status: 500 }
 		);
 	}
 }

@@ -1,17 +1,17 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 import dbConnect from "@/lib/db";
 import GoodsProcurement from "@/models/procurement/GoodsProcurement";
 
-interface RouteParams {
-	params: {
-		id: string;
-	};
+interface Context {
+	params: Promise<{ id: string }>;
 }
 
-export async function GET(request: NextRequest, context: RouteParams) {
+export async function GET(request: NextRequest, context: Context) {
 	try {
 		await dbConnect();
-		const { id } = context.params;
+		const { id } = await context.params;
+
 		const goods = await GoodsProcurement.findById(id)
 			.populate("goodsCategory")
 			.populate("contractor");
@@ -24,24 +24,26 @@ export async function GET(request: NextRequest, context: RouteParams) {
 		}
 
 		return NextResponse.json({ success: true, data: goods });
-	} catch {
+	} catch (error) {
+		console.error("Error fetching goods procurement:", error);
 		return NextResponse.json(
-			{ success: false, error: "Failed to fetch goods procurement" },
+			{ success: false, error: "Internal server error" },
 			{ status: 500 }
 		);
 	}
 }
 
-export async function PUT(request: NextRequest, context: RouteParams) {
+export async function PUT(request: NextRequest, context: Context) {
 	try {
-		const body = await request.json();
-		const { id } = await context.params;
 		await dbConnect();
+		const { id } = await context.params;
+		const body = await request.json();
 
-		const goods = await GoodsProcurement.findByIdAndUpdate(id, body, {
-			new: true,
-			runValidators: true,
-		})
+		const goods = await GoodsProcurement.findByIdAndUpdate(
+			id,
+			{ $set: body },
+			{ new: true, runValidators: true }
+		)
 			.populate("goodsCategory")
 			.populate("contractor");
 
@@ -54,24 +56,19 @@ export async function PUT(request: NextRequest, context: RouteParams) {
 
 		return NextResponse.json({ success: true, data: goods });
 	} catch (error) {
-		console.error("Error updating goods:", error);
+		console.error("Error updating goods procurement:", error);
 		return NextResponse.json(
-			{
-				success: false,
-				error:
-					error instanceof Error
-						? error.message
-						: "Failed to update goods procurement",
-			},
+			{ success: false, error: "Internal server error" },
 			{ status: 500 }
 		);
 	}
 }
 
-export async function DELETE(request: NextRequest, context: RouteParams) {
+export async function DELETE(request: NextRequest, context: Context) {
 	try {
 		await dbConnect();
-		const { id } = context.params;
+		const { id } = await context.params;
+
 		const goods = await GoodsProcurement.findByIdAndDelete(id);
 
 		if (!goods) {
@@ -83,14 +80,9 @@ export async function DELETE(request: NextRequest, context: RouteParams) {
 
 		return NextResponse.json({ success: true, data: null });
 	} catch (error) {
+		console.error("Error deleting goods procurement:", error);
 		return NextResponse.json(
-			{
-				success: false,
-				error:
-					error instanceof Error
-						? error.message
-						: "Failed to delete goods procurement",
-			},
+			{ success: false, error: "Internal server error" },
 			{ status: 500 }
 		);
 	}

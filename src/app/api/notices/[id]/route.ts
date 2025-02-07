@@ -1,16 +1,40 @@
-import { NextResponse, NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 import dbConnect from "@/lib/db";
 import { Notice } from "@/models/Notice";
+import { SubNotice } from "@/models/SubNotice";
+import { writeFile, mkdir } from "fs/promises";
+import path from "path";
+import { existsSync } from "fs";
 
-interface RouteParams {
-	params: {
-		id: string;
-	};
+interface Context {
+	params: Promise<{ id: string }>;
 }
 
-export async function GET(request: NextRequest, context: RouteParams) {
+// Helper function to save PDF file
+async function savePDF(file: File): Promise<string> {
+	const bytes = await file.arrayBuffer();
+	const buffer = Buffer.from(bytes);
+
+	// Create a unique filename
+	const filename = `${Date.now()}-${file.name}`;
+	const uploadDir = path.join(process.cwd(), "public", "uploads", "notices");
+
+	// Create directory if it doesn't exist
+	if (!existsSync(uploadDir)) {
+		await mkdir(uploadDir, { recursive: true });
+	}
+
+	const filepath = path.join(uploadDir, filename);
+
+	// Save the file
+	await writeFile(filepath, buffer);
+	return `/uploads/notices/${filename}`;
+}
+
+export async function GET(request: NextRequest, context: Context) {
 	try {
-		const { id } = context.params;
+		const { id } = await context.params;
 
 		if (!id) {
 			return NextResponse.json(
@@ -43,38 +67,11 @@ export async function GET(request: NextRequest, context: RouteParams) {
 	}
 }
 
-import { SubNotice } from "@/models/SubNotice";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
-import { existsSync } from "fs";
-
-// Helper function to save PDF file
-async function savePDF(file: File): Promise<string> {
-	const bytes = await file.arrayBuffer();
-	const buffer = Buffer.from(bytes);
-
-	// Create a unique filename
-	const filename = `${Date.now()}-${file.name}`;
-	const uploadDir = path.join(process.cwd(), "public", "uploads", "notices");
-
-	// Create directory if it doesn't exist
-	if (!existsSync(uploadDir)) {
-		await mkdir(uploadDir, { recursive: true });
-	}
-
-	const filepath = path.join(uploadDir, filename);
-
-	// Save the file
-	await writeFile(filepath, buffer);
-	return `/uploads/notices/${filename}`;
-}
-
-export async function PUT(
-	req: NextRequest,
-	{ params }: { params: { id: string } }
-) {
+export async function PUT(req: NextRequest, context: Context) {
 	try {
 		await dbConnect();
+
+		const { id } = await context.params; // Crucial await here
 
 		const formData = await req.formData();
 		const title = formData.get("title") as string;
@@ -111,7 +108,7 @@ export async function PUT(
 			updateData.url = url;
 		}
 
-		const notice = await Notice.findByIdAndUpdate(params.id, updateData, {
+		const notice = await Notice.findByIdAndUpdate(id, updateData, {
 			new: true,
 		});
 
@@ -190,9 +187,10 @@ export async function PUT(
 	}
 }
 
-export async function DELETE(request: NextRequest, context: RouteParams) {
+export async function DELETE(request: NextRequest, context: Context) {
 	try {
-		const { id } = context.params;
+		await dbConnect();
+		const { id } = await context.params;
 
 		if (!id) {
 			return NextResponse.json(
@@ -200,8 +198,6 @@ export async function DELETE(request: NextRequest, context: RouteParams) {
 				{ status: 400 }
 			);
 		}
-
-		await dbConnect();
 
 		const notice = await Notice.findByIdAndDelete(id);
 		if (!notice) {

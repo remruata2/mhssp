@@ -4,13 +4,11 @@ import { createReadStream, existsSync } from "fs";
 import { stat, writeFile, mkdir } from "fs/promises";
 
 // Handle file uploads and serving
-interface RouteParams {
-	params: {
-		path: string[];
-	};
+interface Context {
+	params: Promise<{ path: string[] }>;
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest, context: Context) {
 	try {
 		const formData = await request.formData();
 		const file = formData.get("file") as File;
@@ -51,14 +49,10 @@ export async function POST(request: NextRequest) {
 	}
 }
 
-export async function GET(request: NextRequest, context: RouteParams) {
+export async function GET(request: NextRequest, context: Context) {
 	try {
-		const filePath = join(
-			process.cwd(),
-			"public",
-			"uploads",
-			...context.params.path
-		);
+		const { path } = await context.params;
+		const filePath = join(process.cwd(), "public", ...path);
 
 		// Check if file exists
 		if (!existsSync(filePath)) {

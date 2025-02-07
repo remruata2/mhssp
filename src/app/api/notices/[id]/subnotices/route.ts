@@ -1,16 +1,17 @@
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 import dbConnect from "@/lib/db";
 import { SubNotice } from "@/models/SubNotice";
 
-interface RouteParams {
-	params: {
-		id: string;
-	};
+interface Context {
+	params: Promise<{ id: string }>;
 }
 
-export async function GET(request: Request, context: RouteParams) {
+export async function GET(request: NextRequest, context: Context) {
 	try {
-		const { id } = await Promise.resolve(context.params);
+		await dbConnect();
+
+		const { id } = await context.params;
 
 		if (!id) {
 			return NextResponse.json(
@@ -18,8 +19,6 @@ export async function GET(request: Request, context: RouteParams) {
 				{ status: 400 }
 			);
 		}
-
-		await dbConnect();
 
 		const subNotices = await SubNotice.find({ noticeId: id }).sort({
 			order: 1,
