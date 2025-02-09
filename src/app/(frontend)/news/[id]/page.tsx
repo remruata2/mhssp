@@ -59,9 +59,9 @@ export default function NewsDetailPage({ params }: { params: Promise<{ id: strin
 					<h1 className="text-2xl font-bold text-gray-800 mb-4">
 						{error || "News not found"}
 					</h1>
-					<a href="/news" className="text-blue-600 hover:underline">
+					<Link href="/news" className="text-blue-600 hover:underline">
 						Back to News
-					</a>
+					</Link>
 				</div>
 			</div>
 		);
