@@ -136,7 +136,7 @@ const InfrastructurePage = () => {
 			imageUrl: "/images/healthcare.jpg",
 			generalInformation: {
 				name: "Repair and Renovation of MSHCS Office",
-				contractor: "Brilliance Consultancy, M/S Lalhruaitluanga",
+				contractor: "Brilliant Consultancy, M/s Lalhruaitluanga",
 				contractAmount: "₹92.95 Lakhs",
 				inauguratedDate: "15 February 2023",
 			},
