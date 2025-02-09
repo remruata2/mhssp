@@ -69,7 +69,7 @@ export default function ConsultancyPage() {
 		} finally {
 			setLoading(false);
 		}
-	}, []);
+	});
 
 	useEffect(() => {
 		fetchConsultancies();
