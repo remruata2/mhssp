@@ -2,6 +2,7 @@
 
 import { useEffect, useState, use } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import PageTitle from "@/components/ui/PageTitle";
 import { ImageModal } from "@/components/News";
@@ -122,12 +123,12 @@ export default function NewsDetailPage({ params }: { params: Promise<{ id: strin
 				</motion.article>
 
 				<div className="mt-8 text-center">
-					<a
+					<Link
 						href="/news"
 						className="inline-block px-6 py-3 bg-[#1192c3] text-white rounded-md hover:bg-indigo-700 transition-colors"
 					>
 						Back to News
-					</a>
+					</Link>
 				</div>
 			</div>
 

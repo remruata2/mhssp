@@ -52,7 +52,6 @@ export default function ConsultancyPage() {
 		} catch {
 			console.error("Error fetching contractors:", error);
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	const fetchConsultancies = useCallback(async () => {
@@ -70,7 +69,6 @@ export default function ConsultancyPage() {
 		} finally {
 			setLoading(false);
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	useEffect(() => {

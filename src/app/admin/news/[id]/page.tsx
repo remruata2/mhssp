@@ -1,5 +1,6 @@
 import { getNews } from "@/lib/api/news";
 import { NewsItem } from "@/types/news";
+import Link from "next/link";
 
 export default async function NewsItemPage({
 	params,
@@ -12,7 +13,7 @@ export default async function NewsItemPage({
 		return (
 			<div className="p-6">
 				<h1 className="text-2xl font-bold mb-4">News not found</h1>
-				<a href="/news" className="text-blue-600 hover:underline">Back to News</a>
+				<Link href="/news" className="text-blue-600 hover:underline">Back to News</Link>
 			</div>
 		);
 	}
