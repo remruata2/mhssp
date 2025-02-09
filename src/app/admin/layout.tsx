@@ -119,8 +119,7 @@ export default function AdminLayout({
 							href="/admin/procurement"
 							className={`flex items-center px-6 py-3  hover:bg-[#1192c3] ${
 								pathname.startsWith("/admin/procurement")
-									? "bg-white/20 text-[#1192c3] font-semibold"
-									: "text-white"
+									? "bg-white/20" : ""
 							}`}
 						>
 							Procurement
