@@ -82,13 +82,6 @@ export default function NewsDetailPage({ params }: { params: Promise<{ id: strin
 					className="bg-white rounded-lg shadow-lg overflow-hidden"
 				>
 					<div className="p-6">
-							<h3 className="text-sm text-gray-500">
-								{new Date(news.createdAt).toLocaleDateString()}
-							</h3>
-						<div className="flex items-start mb-6">
-							<h1 className="text-3xl font-bold text-gray-900">{news.title}</h1>
-						</div>
-
 						<div className="prose max-w-none mb-8">
 							{news.content.split('\n').map((paragraph, index) => (
 								<p key={index} className="mb-4 text-gray-700">
