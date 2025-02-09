@@ -3,6 +3,8 @@
 import News from "@/components/News";
 import { motion } from "framer-motion";
 import PageTitle from "@/components/ui/PageTitle";
+import Link from "next/link";
+import Image from "next/image";
 
 export default function NewsPage() {
 	const title = "Latest News";
@@ -22,7 +24,38 @@ export default function NewsPage() {
 					className="container mx-auto"
 				>
 					<div className="max-w-6xl mx-auto">
-						<News />
+						<News>
+							{({ items }) => (
+								<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+									{items.map((item) => (
+										<Link
+											key={item._id}
+											href={`/news/${item._id}`}
+											className="group relative block overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-shadow"
+										>
+											{item.images?.length > 0 && (
+												<div className="relative h-48">
+													<Image
+														src={item.images[0]}
+														alt={item.title}
+														fill
+														className="object-cover"
+													/>
+												</div>
+											)}
+											<div className="p-4 bg-white">
+												<h2 className="text-xl font-semibold mb-2 text-gray-800">
+													{item.title}
+												</h2>
+												<p className="text-gray-500 text-sm">
+													{new Date(item.publishDate).toLocaleDateString()}
+												</p>
+											</div>
+										</Link>
+									))}
+								</div>
+							)}
+						</News>
 					</div>
 				</motion.div>
 			</div>

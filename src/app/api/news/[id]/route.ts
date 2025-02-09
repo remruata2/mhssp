@@ -122,10 +122,14 @@ export async function DELETE(request: NextRequest, context: Context) {
 			);
 		}
 
-		// Clean up associated file
-		if (deletedNews.imageUrl) {
-			const filePath = path.join(process.cwd(), "public", deletedNews.imageUrl);
-			await fs.unlink(filePath).catch(() => {}); // Silent fail if file not found
+		// Clean up associated files
+		if (deletedNews.images && deletedNews.images.length > 0) {
+			await Promise.all(
+				deletedNews.images.map(async (imagePath) => {
+					const filePath = path.join(process.cwd(), "public", imagePath);
+					await fs.unlink(filePath).catch(() => {}); // Silent fail if file not found
+				})
+			);
 		}
 
 		return NextResponse.json({ success: true, data: deletedNews });

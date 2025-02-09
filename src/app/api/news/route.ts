@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import dbConnect from "@/lib/db";
 import News from "@/models/News";
 import fs from "fs/promises";
@@ -18,7 +18,7 @@ const uploadDir = path.join(process.cwd(), "public/uploads");
 interface NewsData {
 	title: string;
 	content: string;
-	imageUrl?: string;
+	images?: string[];
 	isPublished: boolean;
 	publishDate: Date;
 }
@@ -37,41 +37,43 @@ export async function POST(request: Request) {
 		console.log("Form data received:", {
 			title: formData.get("title"),
 			content: formData.get("content"),
-			file: formData.get("file"),
+			files: formData.getAll("files"),
 		});
 
 		// Get form values
 		const title = formData.get("title") as string;
 		const content = formData.get("content") as string;
-		const file = formData.get("file") as File | null;
+		const files = formData.getAll("files") as File[];
 
 		// Validate required fields
 		if (!title || !content) {
-			console.error("Missing required fields:", { title, content, file });
+			console.error("Missing required fields:", { title, content, files });
 			return NextResponse.json(
 				{ success: false, error: "Title and content are required" },
 				{ status: 400 }
 			);
 		}
 
-		let imageUrl: string | null = null;
+		let images: string[] = [];
 
-		if (file) {
+		if (files.length > 0) {
 			try {
-				// Process file upload
-				const buffer = await file.arrayBuffer();
-				const filename = `${Date.now()}-${file.name}`;
-				const filePath = path.join(uploadDir, filename);
+				// Process file uploads
+				for (const file of files) {
+					const buffer = await file.arrayBuffer();
+					const filename = `${Date.now()}-${file.name}`;
+					const filePath = path.join(uploadDir, filename);
 
-				// Debug: Log file info
-				console.log("File info:", {
-					filename,
-					filePath,
-					fileSize: buffer.byteLength,
-				});
+					// Debug: Log file info
+					console.log("File info:", {
+						filename,
+						filePath,
+						fileSize: buffer.byteLength,
+					});
 
-				await fs.writeFile(filePath, Buffer.from(buffer));
-				imageUrl = `/uploads/${filename}`;
+					await fs.writeFile(filePath, Buffer.from(buffer));
+					images.push(`/uploads/${filename}`);
+				}
 			} catch (error) {
 				console.error("File upload error:", error);
 				return NextResponse.json(
@@ -85,14 +87,14 @@ export async function POST(request: Request) {
 		console.log("Creating news item with:", {
 			title,
 			content,
-			imageUrl,
+			images,
 		});
 
 		// Create news item
 		const newsData: NewsData = {
 			title,
 			content,
-			...(imageUrl ? { imageUrl } : {}),
+			...(images.length > 0 ? { images } : {}),
 			isPublished: false,
 			publishDate: new Date(),
 		};

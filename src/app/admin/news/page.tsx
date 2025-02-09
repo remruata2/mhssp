@@ -4,13 +4,17 @@ import { useState, useEffect } from "react";
 import { FaEdit, FaTrash, FaPlus } from "react-icons/fa";
 import SlideOver from "@/components/SlideOver";
 import Image from "next/image";
+import Link from "next/link";
 
 interface NewsItem {
 	_id: string;
 	title: string;
 	content: string;
-	imageUrl: string;
+	images: string[];
 	createdAt: string;
+	isPublished?: boolean;
+	publishDate?: string;
+	updatedAt?: string;
 }
 
 const truncateText = (text: string, maxLength: number = 150) => {
@@ -24,9 +28,9 @@ export default function NewsAdmin() {
 	const [formData, setFormData] = useState({
 		title: "",
 		content: "",
-		file: null as File | null,
+		files: [] as File[],
 	});
-	const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
+	const [previewImageUrls, setPreviewImageUrls] = useState<string[]>([]);
 	const [isEditing, setIsEditing] = useState(false);
 	const [editingId, setEditingId] = useState("");
 	const [error, setError] = useState<string | null>(null);
@@ -75,23 +79,31 @@ export default function NewsAdmin() {
 				throw new Error("Title cannot exceed 100 characters");
 			}
 
-			// Validate content length
+			// Validate content length - only minimum length
 			if (formData.content.length < 10) {
 				throw new Error("Content must be at least 10 characters long");
-			}
-			if (formData.content.length > 1000) {
-				throw new Error("Content cannot exceed 1000 characters");
 			}
 
 			const formDataToSubmit = new FormData();
 			formDataToSubmit.append("title", formData.title);
 			formDataToSubmit.append("content", formData.content);
-			if (formData.file) {
-				formDataToSubmit.append("file", formData.file);
-			}
-			// If editing and there's a previewImageUrl but no new file, send the existing imageUrl
-			if (isEditing && previewImageUrl && !formData.file) {
-				formDataToSubmit.append("imageUrl", previewImageUrl);
+			
+			// Handle new files
+			formData.files.forEach((file) => {
+				formDataToSubmit.append('files', file);
+			});
+
+			// Handle existing images in edit mode
+			if (isEditing) {
+				// Only send existing URLs that are still in the previewImageUrls array
+				const existingUrls = previewImageUrls
+					.filter(url => url.includes('/uploads/'))
+					.map(url => url.split(window.location.origin).pop()) // Remove the base URL
+					.filter((path): path is string => !!path); // Type guard to ensure non-null
+
+				existingUrls.forEach(url => {
+					formDataToSubmit.append('existingImageUrls', url);
+				});
 			}
 
 			const url = isEditing ? `/api/news/${editingId}` : "/api/news";
@@ -123,12 +135,27 @@ export default function NewsAdmin() {
 	};
 
 	const handleEdit = (item: NewsItem) => {
+		console.log('Editing item:', item); // Debug log
 		setFormData({
 			title: item.title,
 			content: item.content,
-			file: null,
+			files: [],
 		});
-		setPreviewImageUrl(item.imageUrl);
+
+		// Handle image URLs
+		let urls: string[] = [];
+		if (item.images && item.images.length > 0) {
+			urls = item.images.map(path => {
+				// If the path starts with '/uploads/', prepend the base URL
+				if (path.startsWith('/uploads/')) {
+					return `${window.location.origin}${path}`;
+				}
+				return path;
+			});
+			console.log('Image URLs:', urls); // Debug log
+		}
+
+		setPreviewImageUrls(urls);
 		setIsEditing(true);
 		setEditingId(item._id);
 		setIsModalOpen(true);
@@ -162,9 +189,9 @@ export default function NewsAdmin() {
 		setFormData({
 			title: "",
 			content: "",
-			file: null,
+			files: [],
 		});
-		setPreviewImageUrl(null);
+		setPreviewImageUrls([]);
 		setIsEditing(false);
 		setEditingId("");
 		setError(null);
@@ -176,20 +203,54 @@ export default function NewsAdmin() {
 		setFormData({ ...formData, [e.target.name]: e.target.value });
 	};
 
-	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const file = e.target.files?.[0] || null;
-		setFormData({ ...formData, file });
+	const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+		const newFiles = Array.from(e.target.files || []);
+		
+		// Create preview URLs for all new files
+		const newPreviewUrls = await Promise.all(
+			newFiles.map(file => {
+				return new Promise<string>((resolve, reject) => {
+					if (!file.type.startsWith('image/')) {
+						reject(new Error('Invalid file type'));
+						return;
+					}
 
-		// Update preview image URL if a new file is selected
-		if (file) {
-			const reader = new FileReader();
-			reader.onloadend = () => {
-				setPreviewImageUrl(reader.result as string);
-			};
-			reader.readAsDataURL(file);
-		} else {
-			setPreviewImageUrl(null);
-		}
+					const reader = new FileReader();
+					reader.onloadend = () => {
+						const result = reader.result as string;
+						if (result && result.startsWith('data:image')) {
+							resolve(result);
+						} else {
+							reject(new Error('Invalid image data'));
+						}
+					};
+					reader.onerror = () => reject(new Error('Failed to read file'));
+					reader.readAsDataURL(file);
+				});
+			})
+		).then(urls => urls.filter(url => url)); // Filter out any undefined/null values
+
+		setFormData(prev => ({
+			...prev,
+			files: [...prev.files, ...newFiles]
+		}));
+		setPreviewImageUrls(prev => [...prev, ...newPreviewUrls]);
+	};
+
+	const removeImage = (index: number) => {
+		console.log('Removing image at index:', index); // Debug log
+		console.log('Current preview URLs:', previewImageUrls); // Debug log
+		
+		setPreviewImageUrls(prev => {
+			const updated = prev.filter((_, i) => i !== index);
+			console.log('Updated preview URLs:', updated); // Debug log
+			return updated;
+		});
+
+		setFormData(prev => ({
+			...prev,
+			files: prev.files.filter((_, i) => i !== index)
+		}));
 	};
 
 	if (loading) {
@@ -226,89 +287,35 @@ export default function NewsAdmin() {
 			)}
 
 			<div className="bg-white rounded-lg shadow-md overflow-hidden">
-				<table className="min-w-full divide-y divide-gray-200">
-					<thead className="bg-gray-50">
-						<tr>
-							<th
-								scope="col"
-								className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-							>
-								Title & Content
-							</th>
-							<th
-								scope="col"
-								className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-							>
-								Image
-							</th>
-							<th
-								scope="col"
-								className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-							>
-								Date
-							</th>
-							<th
-								scope="col"
-								className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
-							>
-								Actions
-							</th>
-						</tr>
-					</thead>
-					<tbody className="bg-white divide-y divide-gray-200">
-						{news.map((item) => (
-							<tr key={item._id} className="hover:bg-gray-50">
-								<td className="px-6 py-4">
-									<div className="flex flex-col">
-										<div className="text-sm font-medium text-gray-900">
-											{item.title}
-										</div>
-										<div className="relative group">
-											<p className="text-gray-600 text-sm mb-2 line-clamp-2">
-												{truncateText(item.content)}
-											</p>
-											{item.content.length > 150 && (
-												<div className="hidden group-hover:block absolute z-10 bg-gray-800 text-white p-4 rounded-md shadow-lg max-w-lg whitespace-pre-wrap">
-													{item.content}
-												</div>
-											)}
-										</div>
-									</div>
-								</td>
-								<td className="px-6 py-4">
-									{item.imageUrl && (
-										<Image
-											src={item.imageUrl}
-											alt={item.title}
-											width={800}
-											height={450}
-											className="rounded-lg"
-										/>
-									)}
-								</td>
-								<td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+				{news.map((item) => (
+					<div key={item._id} className="p-4 border-b">
+						<div className="flex justify-between items-center">
+							<div>
+								<h3 className="text-lg font-medium text-gray-800">{item.title}</h3>
+								<p className="text-sm text-gray-500 mt-1">
+									{truncateText(item.content)}
+								</p>
+								<span className="text-sm text-gray-500">
 									{new Date(item.createdAt).toLocaleDateString()}
-								</td>
-								<td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-									<button
-										onClick={() => handleEdit(item)}
-										className="text-indigo-600 hover:text-indigo-900 mr-4"
-										title="Edit"
-									>
-										<FaEdit className="h-5 w-5 inline" />
-									</button>
-									<button
-										onClick={() => handleDelete(item._id)}
-										className="text-red-600 hover:text-red-900"
-										title="Delete"
-									>
-										<FaTrash className="h-5 w-5 inline" />
-									</button>
-								</td>
-							</tr>
-						))}
-					</tbody>
-				</table>
+								</span>
+							</div>
+							<div className="flex gap-2">
+								<button
+									onClick={() => handleEdit(item)}
+									className="p-2 text-blue-600 hover:bg-blue-50 rounded-full"
+								>
+									<FaEdit className="h-5 w-5" />
+								</button>
+								<button
+									onClick={() => handleDelete(item._id)}
+									className="p-2 text-red-600 hover:bg-red-50 rounded-full"
+								>
+									<FaTrash className="h-5 w-5" />
+								</button>
+							</div>
+						</div>
+					</div>
+				))}
 			</div>
 
 			<SlideOver
@@ -349,40 +356,73 @@ export default function NewsAdmin() {
 							name="content"
 							value={formData.content}
 							onChange={handleChange}
-							rows={5}
+							rows={10}
 							className="form-textarea"
 							required
 							minLength={10}
-							maxLength={1000}
 						/>
 						<p className="mt-1 text-xs text-gray-500">
-							{formData.content.length}/1000 characters
+							Minimum 10 characters
 						</p>
 					</div>
 
 					<div>
 						<label htmlFor="file" className="form-label">
-							Image
+							Images {!isEditing && <span className="text-red-500">*</span>}
 						</label>
-						<input
-							type="file"
-							id="file"
-							name="file"
-							onChange={handleFileChange}
-							className="form-input"
-							accept="image/*"
-						/>
+						<div className="space-y-2">
+							{isEditing && previewImageUrls.length > 0 && (
+								<p className="text-sm text-gray-600">
+									Currently has {previewImageUrls.length} image{previewImageUrls.length !== 1 ? 's' : ''}
+								</p>
+							)}
+							<input
+								type="file"
+								id="file"
+								name="file"
+								onChange={handleFileChange}
+								className="form-input"
+								accept="image/*"
+								multiple
+								{...(!isEditing && { required: true })}
+							/>
+							<p className="text-xs text-gray-500">
+								{isEditing 
+									? "Select files to add more images or remove existing ones above"
+									: "You can select multiple images"}
+							</p>
+						</div>
 					</div>
 
-					{previewImageUrl && (
-						<div className="mb-4">
-							<Image
-								src={previewImageUrl}
-								alt="Preview"
-								width={200}
-								height={200}
-								style={{ objectFit: "cover" }}
-							/>
+					{previewImageUrls.length > 0 && (
+						<div className="grid grid-cols-2 gap-4 mb-4">
+							{previewImageUrls.map((url, index) => {
+								console.log('Rendering image URL:', url); // Debug log
+								if (!url) {
+									console.log('Skipping empty URL at index:', index);
+									return null;
+								}
+
+								return (
+									<div key={index} className="relative">
+										<Image
+											src={url}
+											alt={`Preview ${index + 1}`}
+											width={200}
+											height={200}
+											className="object-cover rounded-lg h-48 w-full"
+											unoptimized={true}
+										/>
+										<button
+											type="button"
+											onClick={() => removeImage(index)}
+											className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+										>
+											<FaTrash className="h-4 w-4" />
+										</button>
+									</div>
+								);
+							})}
 						</div>
 					)}
 
