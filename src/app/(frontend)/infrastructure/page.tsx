@@ -143,17 +143,17 @@ const InfrastructurePage = () => {
 			area: { total: "1224 sqm" },
 		},
 		{
-			id: "report-1",
+			id: "report-3",
 			status: "completed",
-			title: "CMO Office, Khawzawl",
-			imageUrl: "/images/khawzawl.jpeg",
+			title: "CMO Office, Hnahthial",
+			imageUrl: "/images/hnahthial.jpeg",
 			generalInformation: {
-				name: "Construction of CMO Office Building",
+				name: "Construction of CMO Office Building, Hnahthial",
 				contractor: "Lushai Engineers",
-				contractAmount: "₹3.45 Crores",
-				inauguratedDate: "15 March 2023",
+				contractAmount: "₹3.97 Crores",
+				inauguratedDate: "17 December 2021",
 			},
-			area: { total: "650 sqm" },
+			area: { total: "1224 sqm" },
 		},
 		{
 			id: "report-2",
@@ -161,7 +161,7 @@ const InfrastructurePage = () => {
 			title: "CMO Office, Saitual",
 			imageUrl: "/images/saitual.jpeg",
 			generalInformation: {
-				name: "Construction of CMO Office Building",
+				name: "Construction of CMO Office Building, Saitual",
 				contractor: "Lushai Engineers",
 				contractAmount: "₹3.20 Crores",
 				inauguratedDate: "1 April 2023",
@@ -169,18 +169,19 @@ const InfrastructurePage = () => {
 			area: { total: "600 sqm" },
 		},
 		{
-			id: "report-3",
+			id: "report-1",
 			status: "completed",
-			title: "CMO Office, Hnahthial",
-			imageUrl: "/images/hnahthial.jpeg",
+			title: "CMO Office, Khawzawl",
+			imageUrl: "/images/khawzawl.jpeg",
 			generalInformation: {
-				name: "Construction of CMO Office Building",
+				name: "Construction of CMO Office Building, Khawzawl",
 				contractor: "Lushai Engineers",
-				contractAmount: "₹3.97 Crores",
-				inauguratedDate: "17 December 2021",
+				contractAmount: "₹3.45 Crores",
+				inauguratedDate: "15 March 2023",
 			},
-			area: { total: "1224 sqm" },
+			area: { total: "650 sqm" },
 		},
+
 		// Ongoing projects
 		{
 			id: "ongoing-1",

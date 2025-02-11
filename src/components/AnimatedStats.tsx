@@ -68,7 +68,7 @@ export default function AnimatedStats() {
 			animate={{ opacity: 1 }}
 		>
 			<AnimatedStat
-				label="IPA Units"
+				label="IPA Health Facilities"
 				value="82"
 				animateNumber={false}
 				icon={<FaHospital />}
