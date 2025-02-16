@@ -3,15 +3,17 @@ import type { NextRequest } from "next/server";
 import dbConnect from "@/lib/db";
 import RFStatus from "@/models/RFStatus";
 
+// Define Context interface to match the structure in the notices route
 interface Context {
-	params: { id: string };
+	params: Promise<{ id: string }>;
 }
 
 // GET single RF status
 export async function GET(request: NextRequest, context: Context) {
 	try {
 		await dbConnect();
-		const status = await RFStatus.findById(context.params.id).populate("rfId");
+		const { id } = await context.params;
+		const status = await RFStatus.findById(id).populate("rfId");
 
 		if (!status) {
 			return NextResponse.json(
@@ -34,13 +36,13 @@ export async function GET(request: NextRequest, context: Context) {
 export async function PUT(request: NextRequest, context: Context) {
 	try {
 		await dbConnect();
+		const { id } = await context.params;
 		const data = await request.json();
 
-		const status = await RFStatus.findByIdAndUpdate(
-			context.params.id,
-			data,
-			{ new: true, runValidators: true }
-		).populate("rfId");
+		const status = await RFStatus.findByIdAndUpdate(id, data, {
+			new: true,
+			runValidators: true,
+		}).populate("rfId");
 
 		if (!status) {
 			return NextResponse.json(
@@ -53,10 +55,7 @@ export async function PUT(request: NextRequest, context: Context) {
 	} catch (error: any) {
 		console.error("Error updating RF status:", error);
 		return NextResponse.json(
-			{
-				success: false,
-				error: error.message || "Failed to update RF status",
-			},
+			{ success: false, error: error.message || "Failed to update RF status" },
 			{ status: 400 }
 		);
 	}
@@ -66,7 +65,8 @@ export async function PUT(request: NextRequest, context: Context) {
 export async function DELETE(request: NextRequest, context: Context) {
 	try {
 		await dbConnect();
-		const status = await RFStatus.findByIdAndDelete(context.params.id);
+		const { id } = await context.params;
+		const status = await RFStatus.findByIdAndDelete(id);
 
 		if (!status) {
 			return NextResponse.json(
@@ -83,4 +83,4 @@ export async function DELETE(request: NextRequest, context: Context) {
 			{ status: 500 }
 		);
 	}
-} 
+}

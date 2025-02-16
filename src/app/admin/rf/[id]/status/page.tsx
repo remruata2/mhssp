@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect, use, useCallback } from "react";
 import { FaEdit, FaTrash, FaPlus } from "react-icons/fa";
 import SlideOver from "@/components/SlideOver";
 import Link from "next/link";
@@ -26,7 +26,11 @@ interface RFStatus {
 	remark?: string;
 }
 
-export default function RFStatusPage({ params }: { params: Promise<{ id: string }> }) {
+export default function RFStatusPage({
+	params,
+}: {
+	params: Promise<{ id: string }>;
+}) {
 	const resolvedParams = use(params);
 	const [indicator, setIndicator] = useState<RFIndicator | null>(null);
 	const [statuses, setStatuses] = useState<RFStatus[]>([]);
@@ -44,12 +48,7 @@ export default function RFStatusPage({ params }: { params: Promise<{ id: string 
 		remark: "",
 	});
 
-	useEffect(() => {
-		fetchIndicator();
-		fetchStatuses();
-	}, [resolvedParams.id]);
-
-	const fetchIndicator = async () => {
+	const fetchIndicator = useCallback(async () => {
 		try {
 			const response = await fetch(`/api/rf/${resolvedParams.id}`);
 			const data = await response.json();
@@ -61,9 +60,9 @@ export default function RFStatusPage({ params }: { params: Promise<{ id: string 
 		} catch (error) {
 			setError("Failed to fetch indicator");
 		}
-	};
+	}, [resolvedParams.id]);
 
-	const fetchStatuses = async () => {
+	const fetchStatuses = useCallback(async () => {
 		try {
 			const response = await fetch(`/api/rf-status?rfId=${resolvedParams.id}`);
 			const data = await response.json();
@@ -77,7 +76,12 @@ export default function RFStatusPage({ params }: { params: Promise<{ id: string 
 		} finally {
 			setLoading(false);
 		}
-	};
+	}, [resolvedParams.id]);
+
+	useEffect(() => {
+		fetchIndicator();
+		fetchStatuses();
+	}, [fetchIndicator, fetchStatuses]);
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -103,7 +107,9 @@ export default function RFStatusPage({ params }: { params: Promise<{ id: string 
 
 			if (data.success) {
 				setSuccessMessage(
-					isEditing ? "Status updated successfully!" : "Status added successfully!"
+					isEditing
+						? "Status updated successfully!"
+						: "Status added successfully!"
 				);
 				resetForm();
 				fetchStatuses();
@@ -161,9 +167,12 @@ export default function RFStatusPage({ params }: { params: Promise<{ id: string 
 	};
 
 	const handleChange = (
-		e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+		e: React.ChangeEvent<
+			HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+		>
 	) => {
-		const value = e.target.type === "number" ? parseInt(e.target.value) : e.target.value;
+		const value =
+			e.target.type === "number" ? parseInt(e.target.value) : e.target.value;
 		setFormData({ ...formData, [e.target.name]: value });
 	};
 
@@ -179,7 +188,10 @@ export default function RFStatusPage({ params }: { params: Promise<{ id: string 
 		<div className="max-w-7xl mx-auto p-4">
 			<div className="flex justify-between items-center mb-6">
 				<div>
-					<Link href="/admin/rf" className="text-blue-600 hover:underline mb-2 block">
+					<Link
+						href="/admin/rf"
+						className="text-blue-600 hover:underline mb-2 block"
+					>
 						← Back to Result Framework
 					</Link>
 					<h1 className="text-2xl font-bold text-gray-800">
@@ -202,7 +214,9 @@ export default function RFStatusPage({ params }: { params: Promise<{ id: string 
 			</div>
 
 			{error && (
-				<div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">{error}</div>
+				<div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
+					{error}
+				</div>
 			)}
 
 			{successMessage && (
@@ -374,4 +388,4 @@ export default function RFStatusPage({ params }: { params: Promise<{ id: string 
 			</SlideOver>
 		</div>
 	);
-} 
+}

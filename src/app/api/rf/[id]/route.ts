@@ -4,14 +4,15 @@ import dbConnect from "@/lib/db";
 import ResultFramework from "@/models/ResultFramework";
 
 interface Context {
-	params: { id: string };
+	params: Promise<{ id: string }>;
 }
 
 // GET single RF indicator
 export async function GET(request: NextRequest, context: Context) {
 	try {
 		await dbConnect();
-		const rf = await ResultFramework.findById(context.params.id);
+		const { id } = await context.params;
+		const rf = await ResultFramework.findById(id);
 
 		if (!rf) {
 			return NextResponse.json(
@@ -80,11 +81,12 @@ export async function PUT(request: NextRequest, context: Context) {
 			yearThreeTarget: data.yearThreeTarget,
 			yearFourTarget: data.yearFourTarget,
 			...(data.baseline && { baseline: data.baseline }),
-			...(data.yearFiveTarget && { yearFiveTarget: data.yearFiveTarget })
+			...(data.yearFiveTarget && { yearFiveTarget: data.yearFiveTarget }),
 		};
 
+		const { id } = await context.params;
 		const rf = await ResultFramework.findByIdAndUpdate(
-			context.params.id,
+			id,
 			rfData,
 			{ new: true, runValidators: true }
 		);
@@ -113,7 +115,8 @@ export async function PUT(request: NextRequest, context: Context) {
 export async function DELETE(request: NextRequest, context: Context) {
 	try {
 		await dbConnect();
-		const rf = await ResultFramework.findByIdAndDelete(context.params.id);
+		const { id } = await context.params;
+		const rf = await ResultFramework.findByIdAndDelete(id);
 
 		if (!rf) {
 			return NextResponse.json(
@@ -130,4 +133,4 @@ export async function DELETE(request: NextRequest, context: Context) {
 			{ status: 500 }
 		);
 	}
-} 
+}
