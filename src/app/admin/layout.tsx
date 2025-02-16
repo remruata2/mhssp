@@ -118,8 +118,7 @@ export default function AdminLayout({
 						<Link
 							href="/admin/procurement"
 							className={`flex items-center px-6 py-3  hover:bg-[#1192c3] ${
-								pathname.startsWith("/admin/procurement")
-									? "bg-white/20" : ""
+								pathname.startsWith("/admin/procurement") ? "bg-white/20" : ""
 							}`}
 						>
 							Procurement
@@ -139,6 +138,14 @@ export default function AdminLayout({
 							}`}
 						>
 							Notice Board
+						</Link>
+						<Link
+							href="/admin/rf"
+							className={`flex items-center px-6 py-3 text-white hover:bg-[#1192c3] ${
+								pathname.startsWith("/admin/rf") ? "bg-white/20" : ""
+							}`}
+						>
+							Result Framework
 						</Link>
 					</nav>
 					{/* Sign out button at bottom of sidebar */}
