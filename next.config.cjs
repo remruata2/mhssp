@@ -12,21 +12,22 @@ const nextConfig = {
 	},
 	images: {
 		remotePatterns: [
+			// Production configuration
 			{
 				protocol: "https",
-				hostname: "**",
+				hostname: "mzhssp.in",
+				pathname: "/uploads/**",
+			},
+			// Local development configuration
+			{
+				protocol: "http",
+				hostname: "localhost",
+				port: "3000",
+				pathname: "/uploads/**",
 			},
 		],
 		domains: ["localhost"],
 		unoptimized: process.env.NODE_ENV === "development",
-	},
-	async rewrites() {
-		return [
-			{
-				source: "/uploads/:path*",
-				destination: "/api/uploads/:path*",
-			},
-		];
 	},
 	eslint: {
 		dirs: ["src"],
