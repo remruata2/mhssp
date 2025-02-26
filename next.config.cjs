@@ -16,6 +16,7 @@ const nextConfig = {
 			{
 				protocol: "https",
 				hostname: "mzhssp.in",
+				port: "8443",
 				pathname: "/uploads/**",
 			},
 			// Local development configuration

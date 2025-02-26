@@ -27,32 +27,37 @@ export default function NewsPage() {
 						<News>
 							{({ items }) => (
 								<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-									{items.map((item) => (
-										<Link
-											key={item._id}
-											href={`/news/${item._id}`}
-											className="group relative block overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-shadow"
-										>
-											{item.images?.length > 0 && (
-												<div className="relative h-48">
-													<Image
-														src={item.images[0]}
-														alt={item.title}
-														fill
-														className="object-cover"
-													/>
-												</div>
-											)}
-											<div className="p-4 bg-white">
-												<h2 className="text-xl font-semibold mb-2 text-gray-800">
-													{item.title}
-												</h2>
-												<p className="text-gray-500 text-sm">
-													{new Date(item.publishDate).toLocaleDateString()}
-												</p>
-											</div>
-										</Link>
-									))}
+									{items.map(
+										(item) => (
+											console.log(item),
+											(
+												<Link
+													key={item._id}
+													href={`/news/${item._id}`}
+													className="group relative block overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-shadow"
+												>
+													{item.images?.length > 0 && (
+														<div className="relative h-48">
+															<Image
+																src={item.images[0]}
+																alt={item.title}
+																fill
+																className="object-cover"
+															/>
+														</div>
+													)}
+													<div className="p-4 bg-white">
+														<h2 className="text-xl font-semibold mb-2 text-gray-800">
+															{item.title}
+														</h2>
+														<p className="text-gray-500 text-sm">
+															{new Date(item.publishDate).toLocaleDateString()}
+														</p>
+													</div>
+												</Link>
+											)
+										)
+									)}
 								</div>
 							)}
 						</News>
