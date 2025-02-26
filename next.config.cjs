@@ -11,6 +11,7 @@ const nextConfig = {
 		return config;
 	},
 	images: {
+		unoptimized: true,
 		remotePatterns: [
 			// Production configuration
 			{
@@ -28,7 +29,6 @@ const nextConfig = {
 			},
 		],
 		domains: ["localhost"],
-		unoptimized: process.env.NODE_ENV === "development",
 	},
 	eslint: {
 		dirs: ["src"],
