@@ -64,8 +64,7 @@ export default function AdminLogin() {
 			console.log("Result:", result);
 			if (result?.ok) {
 				console.log("Login successful");
-				router.push("/admin/dashboard");
-				router.refresh();
+				window.location.href = "/admin/dashboard";
 			}
 		} catch (error: unknown) {
 			const message =
