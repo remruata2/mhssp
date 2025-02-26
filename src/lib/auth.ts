@@ -37,6 +37,7 @@ export const authOptions: NextAuthOptions = {
 				password: { label: "Password", type: "password" },
 			},
 			async authorize(credentials) {
+				console.log("Login attempt with credentials:", credentials);
 				if (!credentials?.username || !credentials?.password) {
 					throw new Error("Missing username or password");
 				}
@@ -49,6 +50,7 @@ export const authOptions: NextAuthOptions = {
 					});
 
 					if (!user) {
+						console.log("User not found:", credentials.username);
 						throw new Error("Invalid username or password");
 					}
 
@@ -58,6 +60,10 @@ export const authOptions: NextAuthOptions = {
 					);
 
 					if (!isValid) {
+						console.log(
+							"Invalid username or password for user:",
+							user.username
+						);
 						throw new Error("Invalid username or password");
 					}
 
