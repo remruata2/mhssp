@@ -22,7 +22,10 @@ export default function AdminLayout({
 		data: Session | null;
 		status: string;
 	};
-	console.log("Session:", session);
+
+	console.log("Session status:", status);
+	console.log("Session data:", session);
+
 	const router = useRouter();
 	const pathname = usePathname();
 	const [isSidebarOpen, setIsSidebarOpen] = useState(false);
