@@ -90,26 +90,41 @@ export default function NewsAdmin() {
 			formDataToSubmit.append("title", formData.title);
 			formDataToSubmit.append("content", formData.content);
 
-			// Handle new files
-			formData.files.forEach((file) => {
-				formDataToSubmit.append("files", file);
-			});
-
-			// Handle existing images in edit mode
-			if (isEditing) {
-				// Only send existing URLs that are still in the previewImageUrls array
-				const existingUrls = previewImageUrls
-					.filter((url) => url.includes("/uploads/"))
-					.map((url) => url.split(window.location.origin).pop()) // Remove the base URL
-					.filter((path): path is string => !!path); // Type guard to ensure non-null
-
-				existingUrls.forEach((url) => {
-					formDataToSubmit.append("existingImageUrls", url);
+			// Use 'files' field for both new and edit modes to handle multiple images
+			if (formData.files.length > 0) {
+				// Add all files to form data (works for both new and edit)
+				formData.files.forEach((file) => {
+					formDataToSubmit.append("files", file);
 				});
+			}
+
+			// Add all preview image URLs to form data (for edit mode)
+			if (isEditing && previewImageUrls.length > 0) {
+				// Add all preview URLs to form data to track which images to keep
+				previewImageUrls.forEach((url) => {
+					formDataToSubmit.append("previewImageUrls[]", url);
+				});
+				console.log("Adding preview URLs to form data:", previewImageUrls);
+			}
+
+			// Set removeImage flag if all images were removed (edit mode only)
+			if (isEditing) {
+				const removeImage = previewImageUrls.length === 0;
+				formDataToSubmit.append("removeImage", removeImage.toString());
+				console.log("Edit mode - Remove image flag:", removeImage);
 			}
 
 			const url = isEditing ? `/api/news/${editingId}` : "/api/news";
 			const method = isEditing ? "PUT" : "POST";
+
+			console.log("Submitting form data:", {
+				url,
+				method,
+				isEditing,
+				hasFiles: formData.files.length > 0,
+				fileCount: formData.files.length,
+				previewUrls: previewImageUrls.length,
+			});
 
 			const response = await fetch(url, {
 				method,
@@ -126,7 +141,7 @@ export default function NewsAdmin() {
 				fetchNews();
 				setIsModalOpen(false);
 			} else {
-				throw new Error(data.message || "Failed to save news");
+				throw new Error(data.error || "Failed to save news");
 			}
 		} catch (err) {
 			console.error("Form submission error:", err);
@@ -137,7 +152,6 @@ export default function NewsAdmin() {
 	};
 
 	const handleEdit = (item: NewsItem) => {
-		console.log("Editing item:", item); // Debug log
 		setFormData({
 			title: item.title,
 			content: item.content,
@@ -150,11 +164,13 @@ export default function NewsAdmin() {
 			urls = item.images.map((path) => {
 				// If the path starts with '/uploads/', prepend the base URL
 				if (path.startsWith("/uploads/")) {
-					return `${window.location.origin}${path}`;
+					// Apply ensurePort8443 first, then add cache-busting
+					const portAdjustedUrl = ensurePort8443(`${window.location.origin}${path}`);
+					return cacheBusterUrl(portAdjustedUrl);
 				}
 				return path;
 			});
-			console.log("Image URLs:", urls); // Debug log
+			console.log("Image URLs for edit:", urls); // Debug log
 		}
 
 		setPreviewImageUrls(urls);
@@ -411,9 +427,7 @@ export default function NewsAdmin() {
 								return (
 									<div key={index} className="relative">
 										<Image
-											src={
-												isEditing ? cacheBusterUrl(ensurePort8443(url)) : url
-											}
+											src={url}
 											alt={`Preview ${index + 1}`}
 											width={200}
 											height={200}
