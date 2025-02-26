@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import PageTitle from "@/components/ui/PageTitle";
-import { ImageModal } from "@/components/News";
+import { ImageModal, ensurePort8443 } from "@/components/News";
 
 interface NewsItem {
 	_id: string;
@@ -30,7 +30,12 @@ export default function NewsDetailPage({ params }: { params: Promise<{ id: strin
 				const data = await response.json();
 				
 				if (data.success) {
-					setNews(data.data);
+					// Process image URLs to ensure they include port 8443
+					const processedNews = {
+						...data.data,
+						images: data.data.images?.map(ensurePort8443) || []
+					};
+					setNews(processedNews);
 				} else {
 					setError(data.message || "Failed to fetch news");
 				}
@@ -101,7 +106,7 @@ export default function NewsDetailPage({ params }: { params: Promise<{ id: strin
 											onClick={() => setSelectedImage({ url: image, title: news.title })}
 										>
 											<Image
-												src={image}
+												src={ensurePort8443(image)}
 												alt={`${news.title} - Image ${index + 1}`}
 												fill
 												className="object-cover rounded-lg"
@@ -128,7 +133,7 @@ export default function NewsDetailPage({ params }: { params: Promise<{ id: strin
 			<AnimatePresence>
 				{selectedImage && (
 					<ImageModal
-						imageUrl={selectedImage.url}
+						imageUrl={ensurePort8443(selectedImage.url)}
 						title={selectedImage.title}
 						onClose={() => setSelectedImage(null)}
 					/>

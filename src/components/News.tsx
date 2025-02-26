@@ -20,7 +20,7 @@ interface ImageModalProps {
 }
 
 // Utility function to ensure image URLs include port 8443
-const ensurePort8443 = (url: string): string => {
+export const ensurePort8443 = (url: string): string => {
   if (!url) return url;
   
   // Check if the URL is for mzhssp.in without a port

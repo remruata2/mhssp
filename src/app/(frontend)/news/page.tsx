@@ -1,6 +1,6 @@
 "use client";
 
-import News from "@/components/News";
+import News, { ensurePort8443 } from "@/components/News";
 import { motion } from "framer-motion";
 import PageTitle from "@/components/ui/PageTitle";
 import Link from "next/link";
@@ -39,7 +39,7 @@ export default function NewsPage() {
 													{item.images?.length > 0 && (
 														<div className="relative h-48">
 															<Image
-																src={item.images[0]}
+																src={ensurePort8443(item.images[0])}
 																alt={item.title}
 																fill
 																className="object-cover"
