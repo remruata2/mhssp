@@ -146,7 +146,7 @@ export default function NewsDetailPage({
 			<AnimatePresence>
 				{selectedImage && (
 					<ImageModal
-						imageUrl={ensurePort8443(selectedImage.url)}
+						imageUrl={selectedImage.url}
 						title={selectedImage.title}
 						onClose={() => setSelectedImage(null)}
 					/>
