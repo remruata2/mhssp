@@ -12,6 +12,12 @@ const nextConfig = {
 	},
 	images: {
 		unoptimized: true,
+		formats: ["image/avif", "image/webp"],
+		minimumCacheTTL: 0,
+		disableStaticImages: false,
+		dangerouslyAllowSVG: true,
+		contentDispositionType: "attachment",
+		contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
 		remotePatterns: [
 			// Production configuration
 			{
@@ -28,7 +34,7 @@ const nextConfig = {
 				pathname: "/uploads/**",
 			},
 		],
-		domains: ["localhost"],
+		domains: ["localhost", "mzhssp.in"],
 	},
 	eslint: {
 		dirs: ["src"],

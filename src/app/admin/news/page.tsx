@@ -5,6 +5,8 @@ import { FaEdit, FaTrash, FaPlus } from "react-icons/fa";
 import SlideOver from "@/components/SlideOver";
 import Image from "next/image";
 import Link from "next/link";
+import { cacheBusterUrl } from "@/lib/imageCacheBuster";
+import { ensurePort8443 } from "@/components/News";
 
 interface NewsItem {
 	_id: string;
@@ -87,22 +89,22 @@ export default function NewsAdmin() {
 			const formDataToSubmit = new FormData();
 			formDataToSubmit.append("title", formData.title);
 			formDataToSubmit.append("content", formData.content);
-			
+
 			// Handle new files
 			formData.files.forEach((file) => {
-				formDataToSubmit.append('files', file);
+				formDataToSubmit.append("files", file);
 			});
 
 			// Handle existing images in edit mode
 			if (isEditing) {
 				// Only send existing URLs that are still in the previewImageUrls array
 				const existingUrls = previewImageUrls
-					.filter(url => url.includes('/uploads/'))
-					.map(url => url.split(window.location.origin).pop()) // Remove the base URL
+					.filter((url) => url.includes("/uploads/"))
+					.map((url) => url.split(window.location.origin).pop()) // Remove the base URL
 					.filter((path): path is string => !!path); // Type guard to ensure non-null
 
-				existingUrls.forEach(url => {
-					formDataToSubmit.append('existingImageUrls', url);
+				existingUrls.forEach((url) => {
+					formDataToSubmit.append("existingImageUrls", url);
 				});
 			}
 
@@ -135,7 +137,7 @@ export default function NewsAdmin() {
 	};
 
 	const handleEdit = (item: NewsItem) => {
-		console.log('Editing item:', item); // Debug log
+		console.log("Editing item:", item); // Debug log
 		setFormData({
 			title: item.title,
 			content: item.content,
@@ -145,14 +147,14 @@ export default function NewsAdmin() {
 		// Handle image URLs
 		let urls: string[] = [];
 		if (item.images && item.images.length > 0) {
-			urls = item.images.map(path => {
+			urls = item.images.map((path) => {
 				// If the path starts with '/uploads/', prepend the base URL
-				if (path.startsWith('/uploads/')) {
+				if (path.startsWith("/uploads/")) {
 					return `${window.location.origin}${path}`;
 				}
 				return path;
 			});
-			console.log('Image URLs:', urls); // Debug log
+			console.log("Image URLs:", urls); // Debug log
 		}
 
 		setPreviewImageUrls(urls);
@@ -205,51 +207,51 @@ export default function NewsAdmin() {
 
 	const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
 		const newFiles = Array.from(e.target.files || []);
-		
+
 		// Create preview URLs for all new files
 		const newPreviewUrls = await Promise.all(
-			newFiles.map(file => {
+			newFiles.map((file) => {
 				return new Promise<string>((resolve, reject) => {
-					if (!file.type.startsWith('image/')) {
-						reject(new Error('Invalid file type'));
+					if (!file.type.startsWith("image/")) {
+						reject(new Error("Invalid file type"));
 						return;
 					}
 
 					const reader = new FileReader();
 					reader.onloadend = () => {
 						const result = reader.result as string;
-						if (result && result.startsWith('data:image')) {
+						if (result && result.startsWith("data:image")) {
 							resolve(result);
 						} else {
-							reject(new Error('Invalid image data'));
+							reject(new Error("Invalid image data"));
 						}
 					};
-					reader.onerror = () => reject(new Error('Failed to read file'));
+					reader.onerror = () => reject(new Error("Failed to read file"));
 					reader.readAsDataURL(file);
 				});
 			})
-		).then(urls => urls.filter(url => url)); // Filter out any undefined/null values
+		).then((urls) => urls.filter((url) => url)); // Filter out any undefined/null values
 
-		setFormData(prev => ({
+		setFormData((prev) => ({
 			...prev,
-			files: [...prev.files, ...newFiles]
+			files: [...prev.files, ...newFiles],
 		}));
-		setPreviewImageUrls(prev => [...prev, ...newPreviewUrls]);
+		setPreviewImageUrls((prev) => [...prev, ...newPreviewUrls]);
 	};
 
 	const removeImage = (index: number) => {
-		console.log('Removing image at index:', index); // Debug log
-		console.log('Current preview URLs:', previewImageUrls); // Debug log
-		
-		setPreviewImageUrls(prev => {
+		console.log("Removing image at index:", index); // Debug log
+		console.log("Current preview URLs:", previewImageUrls); // Debug log
+
+		setPreviewImageUrls((prev) => {
 			const updated = prev.filter((_, i) => i !== index);
-			console.log('Updated preview URLs:', updated); // Debug log
+			console.log("Updated preview URLs:", updated); // Debug log
 			return updated;
 		});
 
-		setFormData(prev => ({
+		setFormData((prev) => ({
 			...prev,
-			files: prev.files.filter((_, i) => i !== index)
+			files: prev.files.filter((_, i) => i !== index),
 		}));
 	};
 
@@ -291,7 +293,9 @@ export default function NewsAdmin() {
 					<div key={item._id} className="p-4 border-b">
 						<div className="flex justify-between items-center">
 							<div>
-								<h3 className="text-lg font-medium text-gray-800">{item.title}</h3>
+								<h3 className="text-lg font-medium text-gray-800">
+									{item.title}
+								</h3>
 								<p className="text-sm text-gray-500 mt-1">
 									{truncateText(item.content)}
 								</p>
@@ -361,9 +365,7 @@ export default function NewsAdmin() {
 							required
 							minLength={10}
 						/>
-						<p className="mt-1 text-xs text-gray-500">
-							Minimum 10 characters
-						</p>
+						<p className="mt-1 text-xs text-gray-500">Minimum 10 characters</p>
 					</div>
 
 					<div>
@@ -373,7 +375,8 @@ export default function NewsAdmin() {
 						<div className="space-y-2">
 							{isEditing && previewImageUrls.length > 0 && (
 								<p className="text-sm text-gray-600">
-									Currently has {previewImageUrls.length} image{previewImageUrls.length !== 1 ? 's' : ''}
+									Currently has {previewImageUrls.length} image
+									{previewImageUrls.length !== 1 ? "s" : ""}
 								</p>
 							)}
 							<input
@@ -387,7 +390,7 @@ export default function NewsAdmin() {
 								{...(!isEditing && { required: true })}
 							/>
 							<p className="text-xs text-gray-500">
-								{isEditing 
+								{isEditing
 									? "Select files to add more images or remove existing ones above"
 									: "You can select multiple images"}
 							</p>
@@ -397,16 +400,16 @@ export default function NewsAdmin() {
 					{previewImageUrls.length > 0 && (
 						<div className="grid grid-cols-2 gap-4 mb-4">
 							{previewImageUrls.map((url, index) => {
-								console.log('Rendering image URL:', url); // Debug log
+								console.log("Rendering image URL:", url); // Debug log
 								if (!url) {
-									console.log('Skipping empty URL at index:', index);
+									console.log("Skipping empty URL at index:", index);
 									return null;
 								}
 
 								return (
 									<div key={index} className="relative">
 										<Image
-											src={url}
+											src={cacheBusterUrl(ensurePort8443(url))}
 											alt={`Preview ${index + 1}`}
 											width={200}
 											height={200}

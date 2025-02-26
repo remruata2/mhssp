@@ -6,6 +6,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import PageTitle from "@/components/ui/PageTitle";
 import { ImageModal, ensurePort8443 } from "@/components/News";
+import { cacheBusterUrl } from "@/lib/imageCacheBuster";
 
 interface NewsItem {
 	_id: string;
@@ -16,24 +17,31 @@ interface NewsItem {
 	createdAt: string;
 }
 
-export default function NewsDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default function NewsDetailPage({
+	params,
+}: {
+	params: Promise<{ id: string }>;
+}) {
 	const resolvedParams = use(params);
 	const [news, setNews] = useState<NewsItem | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const [selectedImage, setSelectedImage] = useState<{ url: string; title: string } | null>(null);
+	const [selectedImage, setSelectedImage] = useState<{
+		url: string;
+		title: string;
+	} | null>(null);
 
 	useEffect(() => {
 		const fetchNews = async () => {
 			try {
 				const response = await fetch(`/api/news/${resolvedParams.id}`);
 				const data = await response.json();
-				
+
 				if (data.success) {
 					// Process image URLs to ensure they include port 8443
 					const processedNews = {
 						...data.data,
-						images: data.data.images?.map(ensurePort8443) || []
+						images: data.data.images?.map(ensurePort8443) || [],
 					};
 					setNews(processedNews);
 				} else {
@@ -74,7 +82,7 @@ export default function NewsDetailPage({ params }: { params: Promise<{ id: strin
 
 	return (
 		<div className="min-h-screen bg-gray-50">
-			<PageTitle 
+			<PageTitle
 				title={news.title}
 				subtitle={new Date(news.publishDate).toLocaleDateString()}
 			/>
@@ -88,7 +96,7 @@ export default function NewsDetailPage({ params }: { params: Promise<{ id: strin
 				>
 					<div className="p-6">
 						<div className="prose max-w-none mb-8">
-							{news.content.split('\n').map((paragraph, index) => (
+							{news.content.split("\n").map((paragraph, index) => (
 								<p key={index} className="mb-4 text-gray-700">
 									{paragraph}
 								</p>
@@ -97,16 +105,20 @@ export default function NewsDetailPage({ params }: { params: Promise<{ id: strin
 
 						{news.images && news.images.length > 0 && (
 							<div className="mt-8">
-								<h2 className="text-xl font-semibold mb-4 text-gray-900">Images</h2>
+								<h2 className="text-xl font-semibold mb-4 text-gray-900">
+									Images
+								</h2>
 								<div className="grid grid-cols-2 md:grid-cols-3 gap-4">
 									{news.images.map((image, index) => (
-										<div 
-											key={index} 
+										<div
+											key={index}
 											className="relative h-48 cursor-pointer hover:opacity-90 transition-opacity"
-											onClick={() => setSelectedImage({ url: image, title: news.title })}
+											onClick={() =>
+												setSelectedImage({ url: image, title: news.title })
+											}
 										>
 											<Image
-												src={ensurePort8443(image)}
+												src={cacheBusterUrl(ensurePort8443(image))}
 												alt={`${news.title} - Image ${index + 1}`}
 												fill
 												unoptimized={true}

@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import PageTitle from "@/components/ui/PageTitle";
 import Link from "next/link";
 import Image from "next/image";
+import { cacheBusterUrl } from "@/lib/imageCacheBuster";
 
 export default function NewsPage() {
 	const title = "Latest News";
@@ -39,7 +40,9 @@ export default function NewsPage() {
 													{item.images?.length > 0 && (
 														<div className="relative h-48">
 															<Image
-																src={ensurePort8443(item.images[0])}
+																src={cacheBusterUrl(
+																	ensurePort8443(item.images[0])
+																)}
 																alt={item.title}
 																fill
 																unoptimized={true}
