@@ -163,6 +163,8 @@ export default function NewsAdmin() {
 		setIsModalOpen(true);
 	};
 
+	console.log("isEditing:", isEditing);
+
 	const handleAdd = () => {
 		resetForm();
 		setIsModalOpen(true);
