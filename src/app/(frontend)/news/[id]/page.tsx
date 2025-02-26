@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import PageTitle from "@/components/ui/PageTitle";
-import { ImageModal, ensurePort8443 } from "@/components/News";
+import { ImageModal } from "@/components/News";
 import { cacheBusterUrl } from "@/lib/imageCacheBuster";
 
 interface NewsItem {
@@ -41,7 +41,7 @@ export default function NewsDetailPage({
 					// Process image URLs to ensure they include port 8443
 					const processedNews = {
 						...data.data,
-						images: data.data.images?.map(ensurePort8443) || [],
+						images: data.data.images.map(cacheBusterUrl) || [],
 					};
 					setNews(processedNews);
 				} else {
@@ -118,7 +118,7 @@ export default function NewsDetailPage({
 											}
 										>
 											<Image
-												src={cacheBusterUrl(ensurePort8443(image))}
+												src={image}
 												alt={`${news.title} - Image ${index + 1}`}
 												fill
 												unoptimized={true}

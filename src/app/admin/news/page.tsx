@@ -409,7 +409,9 @@ export default function NewsAdmin() {
 								return (
 									<div key={index} className="relative">
 										<Image
-											src={cacheBusterUrl(ensurePort8443(url))}
+											src={
+												isEditing ? cacheBusterUrl(ensurePort8443(url)) : url
+											}
 											alt={`Preview ${index + 1}`}
 											width={200}
 											height={200}

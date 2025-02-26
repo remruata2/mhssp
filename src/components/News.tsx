@@ -48,7 +48,7 @@ export const ImageModal = ({ imageUrl, title, onClose }: ImageModalProps) => (
 				<FaTimes className="w-6 h-6" />
 			</button>
 			<Image
-				src={cacheBusterUrl(ensurePort8443(imageUrl))}
+				src={imageUrl}
 				alt={title}
 				fill
 				unoptimized={true}

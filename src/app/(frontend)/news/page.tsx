@@ -1,6 +1,6 @@
 "use client";
 
-import News, { ensurePort8443 } from "@/components/News";
+import News from "@/components/News";
 import { motion } from "framer-motion";
 import PageTitle from "@/components/ui/PageTitle";
 import Link from "next/link";
@@ -40,9 +40,7 @@ export default function NewsPage() {
 													{item.images?.length > 0 && (
 														<div className="relative h-48">
 															<Image
-																src={cacheBusterUrl(
-																	ensurePort8443(item.images[0])
-																)}
+																src={cacheBusterUrl(item.images[0])}
 																alt={item.title}
 																fill
 																unoptimized={true}
