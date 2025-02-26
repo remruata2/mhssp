@@ -51,14 +51,39 @@ export async function PUT(request: NextRequest, context: Context) {
 		const title = formData.get("title")?.toString();
 		const content = formData.get("content")?.toString();
 		const files = formData.getAll("files") as File[]; // Get all files
+		const removeImage = formData.get("removeImage") === "true";
+
 		console.log("PUT request received for news ID:", id);
 		console.log("TargetFile: route.ts");
 		console.log("Form data:", {
 			title,
 			content,
 			fileCount: files.length,
+			removeImage,
 			previewImageUrls: formData.getAll("previewImageUrls[]"),
 		});
+
+		// Get preview image URLs from form data and normalize them for comparison
+		const previewImageUrls = formData
+			.getAll("previewImageUrls[]")
+			.map((url) => {
+				// If this is a full URL with origin, extract just the path part
+				const urlString = url.toString();
+				if (urlString.includes(process.env.NEXT_PUBLIC_BASE_URL || "")) {
+					return new URL(urlString).pathname;
+				}
+				return urlString;
+			});
+
+		console.log("Normalized preview URLs:", previewImageUrls);
+
+		// Validation
+		if (!title || !content) {
+			return NextResponse.json(
+				{ success: false, error: "Title and content are required" },
+				{ status: 400 }
+			);
+		}
 
 		// Get the existing news item
 		const existingNews = await News.findById(id);
@@ -69,135 +94,168 @@ export async function PUT(request: NextRequest, context: Context) {
 			);
 		}
 
-		// Get preview image URLs from form data and normalize them for comparison
-		const previewImageUrls = formData
-			.getAll("previewImageUrls[]")
-			.map((url) => {
-				const urlString = url.toString();
-
-				// Extract just the path part from the URL
-				// This handles both full URLs and relative paths
-				try {
-					if (urlString.includes("http")) {
-						// For full URLs, extract the pathname
-						const urlObj = new URL(urlString);
-						const pathname = urlObj.pathname;
-
-						// Remove any query parameters
-						return pathname.split("?")[0];
-					}
-				} catch (e) {
-					console.warn("Error parsing URL:", urlString, e);
-				}
-
-				// For relative paths or if URL parsing failed
-				return urlString.split("?")[0];
-			});
-
-		console.log("Normalized preview URLs:", previewImageUrls);
-		console.log("Existing images:", existingNews.images);
-
-		// Validation
-		if (!title || !content) {
-			return NextResponse.json(
-				{ success: false, error: "Title and content are required" },
-				{ status: 400 }
-			);
-		}
-
 		// Prepare update data
 		const updateData: any = { title, content };
-		let finalImages: string[] = [];
 
-		// Handle image updates based on preview URLs and new uploads
-		try {
-			// If removeImage flag is true, remove all images
-			if (previewImageUrls.length === 0) {
-				console.log("removeImage flag is true, removing all images");
+		// Handle image updates - following the same pattern as POST method
+		if (files.length > 0) {
+			try {
+				let images: string[] = [];
 
-				// Delete all existing image files
-				if (existingNews.images && existingNews.images.length > 0) {
-					existingNews.images.forEach((imagePath) => {
-						try {
-							const cleanPath = imagePath.split("?")[0];
-							const filePath = path.join(process.cwd(), "public", cleanPath);
-							fs.access(filePath)
-								.then(() => fs.unlink(filePath))
-								.then(() => console.log(`Deleted image: ${filePath}`))
-								.catch((err) =>
-									console.warn(`Error deleting image: ${filePath}`, err)
-								);
-						} catch (error) {
-							console.warn("Error handling image deletion:", error);
-						}
-					});
+				// Process all file uploads - same as in POST method
+				for (const file of files) {
+					if (!file.size) {
+						console.log("Skipping empty file");
+						continue;
+					}
+
+					const buffer = await file.arrayBuffer();
+					const filename = `${Date.now()}-${file.name}`;
+					const filePath = path.join(uploadDir, filename);
+
+					await fs.writeFile(filePath, Buffer.from(buffer));
+					await fs.chmod(filePath, 0o644); // Set file permissions to -rw-r--r--
+
+					// Add to images array
+					images.push(`/uploads/${filename}`);
+					console.log("New image uploaded:", `/uploads/${filename}`);
 				}
 
-				// Set images to empty array
-				finalImages = [];
-			} else {
-				// 1. Keep existing images that are still in the preview
-				if (existingNews.images && existingNews.images.length > 0) {
-					// For each existing image, check if it should be kept
-					existingNews.images.forEach((existingImage) => {
-						// Clean the path for comparison
-						const cleanPath = existingImage.split("?")[0];
+				// Keep existing images that are still in the preview
+				if (existingNews.images) {
+					// Need to normalize existing images for comparison
+					const normalizedExistingImages = existingNews.images.map((img) => {
+						// Extract just the path part regardless of query parameters
+						return img.split("?")[0];
+					});
 
-						// Check if any preview URL contains this path
-						const shouldKeep = previewImageUrls.some((previewUrl) => {
-							// Extract just the path part for comparison
-							return previewUrl === cleanPath;
+					console.log("Normalized existing images:", normalizedExistingImages);
+
+					// Find which existing images to keep
+					for (const existingImage of normalizedExistingImages) {
+						// Check if this path is in the preview URLs
+						const isKept = previewImageUrls.some((previewUrl) => {
+							// If previewUrl contains the existingImage path
+							return previewUrl.includes(existingImage);
 						});
 
-						if (shouldKeep) {
-							finalImages.push(existingImage);
-							console.log("Keeping existing image:", existingImage);
+						if (isKept) {
+							// Keep the original path with any query parameters
+							const originalPath =
+								existingNews.images[
+									normalizedExistingImages.indexOf(existingImage)
+								];
+							images.push(originalPath);
+							console.log("Keeping image:", originalPath);
 						} else {
-							// Delete the image file that's being removed
-							try {
-								const filePath = path.join(process.cwd(), "public", cleanPath);
-								fs.access(filePath)
-									.then(() => fs.unlink(filePath))
-									.then(() => console.log(`Deleted image: ${filePath}`))
-									.catch((err) =>
-										console.warn(`Error deleting image: ${filePath}`, err)
-									);
-							} catch (error) {
-								console.warn("Error handling image deletion:", error);
-							}
-							console.log("Removing existing image:", existingImage);
+							console.log("Removing image:", existingImage);
 						}
-					});
-				}
-
-				// 2. Add any new uploaded images
-				if (files.length > 0) {
-					for (const file of files) {
-						if (!file.size) continue;
-
-						const buffer = await file.arrayBuffer();
-						const filename = `${Date.now()}-${file.name}`;
-						const filePath = path.join(uploadDir, filename);
-
-						await fs.writeFile(filePath, Buffer.from(buffer));
-						await fs.chmod(filePath, 0o644);
-
-						const newImagePath = `/uploads/${filename}`;
-						finalImages.push(newImagePath);
-						console.log("Added new image:", newImagePath);
 					}
 				}
-			}
-		} catch (error) {
-			console.error("Error handling images:", error);
-			return NextResponse.json(
-				{ success: false, error: "Image processing failed" },
-				{ status: 500 }
-			);
-		}
 
-		// Update updateData with finalImages
-		updateData.images = finalImages;
+				// Update the images array with all new image paths
+				updateData.images = images;
+
+				// Delete images that were removed from preview
+				if (existingNews.images) {
+					// Filter images that need to be deleted (not in preview)
+					const imagesToDelete = existingNews.images.filter((existingImage) => {
+						// Normalize the image path for comparison
+						const normalizedPath = existingImage.split("?")[0];
+
+						// Check if any preview URL contains this path
+						const isKept = previewImageUrls.some((previewUrl) => {
+							return previewUrl.includes(normalizedPath);
+						});
+
+						// Return true if image should be deleted (not kept)
+						return !isKept;
+					});
+
+					console.log("Images to delete:", imagesToDelete);
+
+					// Delete old image files if they exist
+					await Promise.all(
+						imagesToDelete.map(async (oldImagePath) => {
+							try {
+								// Extract clean path without query parameters
+								const cleanPath = oldImagePath.split("?")[0];
+								const oldFilePath = path.join(
+									process.cwd(),
+									"public",
+									cleanPath
+								);
+
+								console.log(`Attempting to delete old image: ${oldFilePath}`);
+
+								// Check if file exists before attempting to delete
+								await fs
+									.access(oldFilePath)
+									.then(async () => {
+										await fs.unlink(oldFilePath);
+										console.log(
+											`Successfully deleted old image: ${oldFilePath}`
+										);
+									})
+									.catch((err) => {
+										console.warn(
+											`Old image not found or could not be deleted: ${oldFilePath}`,
+											err
+										);
+									});
+							} catch (error) {
+								console.warn("Could not delete old image:", error);
+								// Continue even if deletion fails
+							}
+						})
+					);
+				}
+			} catch (error) {
+				console.error("Error handling file upload:", error);
+				return NextResponse.json(
+					{ success: false, error: "File upload failed" },
+					{ status: 500 }
+				);
+			}
+		} else if (removeImage) {
+			// If removeImage flag is true, set images to empty array
+			updateData.images = [];
+
+			console.log("Removing all images");
+
+			// Delete existing image files
+			if (existingNews.images && existingNews.images.length > 0) {
+				await Promise.all(
+					existingNews.images.map(async (imagePath) => {
+						try {
+							// Extract clean path without query parameters
+							const cleanPath = imagePath.split("?")[0];
+							const filePath = path.join(process.cwd(), "public", cleanPath);
+
+							console.log(`Attempting to delete image: ${filePath}`);
+
+							// Check if file exists before attempting to delete
+							await fs
+								.access(filePath)
+								.then(async () => {
+									await fs.unlink(filePath);
+									console.log(`Successfully deleted image: ${filePath}`);
+								})
+								.catch((err) => {
+									console.warn(
+										`Image not found or could not be deleted: ${filePath}`,
+										err
+									);
+								});
+						} catch (error) {
+							console.warn("Could not delete image:", error);
+							// Continue even if deletion fails
+						}
+					})
+				);
+			}
+		}
+		// If neither uploading a new image nor removing existing ones, keep the current images
 
 		// Update news item in database
 		const updatedNews = await News.findByIdAndUpdate(id, updateData, {

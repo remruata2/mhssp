@@ -98,15 +98,6 @@ export default function NewsAdmin() {
 				});
 			}
 
-			// Add all preview image URLs to form data (for edit mode)
-			if (isEditing && previewImageUrls.length > 0) {
-				// Add all preview URLs to form data to track which images to keep
-				previewImageUrls.forEach((url) => {
-					formDataToSubmit.append("previewImageUrls[]", url);
-				});
-				console.log("Adding preview URLs to form data:", previewImageUrls);
-			}
-
 			// Set removeImage flag if all images were removed (edit mode only)
 			if (isEditing) {
 				const removeImage = previewImageUrls.length === 0;
@@ -164,9 +155,9 @@ export default function NewsAdmin() {
 			urls = item.images.map((path) => {
 				// If the path starts with '/uploads/', prepend the base URL
 				if (path.startsWith("/uploads/")) {
-					// Apply ensurePort8443 first, then add cache-busting
-					const portAdjustedUrl = ensurePort8443(`${window.location.origin}${path}`);
-					return cacheBusterUrl(portAdjustedUrl);
+					// Add a cache-busting parameter to force refresh
+					const cacheBuster = `?t=${Date.now()}`;
+					return `${window.location.origin}${path}${cacheBuster}`;
 				}
 				return path;
 			});
