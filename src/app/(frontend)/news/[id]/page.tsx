@@ -109,8 +109,9 @@ export default function NewsDetailPage({ params }: { params: Promise<{ id: strin
 												src={ensurePort8443(image)}
 												alt={`${news.title} - Image ${index + 1}`}
 												fill
-												className="object-cover rounded-lg"
 												unoptimized={true}
+												sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+												className="object-cover rounded-lg"
 											/>
 										</div>
 									))}

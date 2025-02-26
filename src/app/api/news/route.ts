@@ -10,6 +10,7 @@ const uploadDir = path.join(process.cwd(), "public/uploads");
 (async () => {
 	try {
 		await fs.mkdir(uploadDir, { recursive: true });
+		await fs.chmod(uploadDir, 0o755); // Set directory permissions to drwxr-xr-x
 	} catch (error) {
 		console.error("Error creating upload directory:", error);
 	}
@@ -72,6 +73,7 @@ export async function POST(request: Request) {
 					});
 
 					await fs.writeFile(filePath, Buffer.from(buffer));
+					await fs.chmod(filePath, 0o644); // Set file permissions to -rw-r--r--
 					images.push(`/uploads/${filename}`);
 				}
 			} catch (error) {

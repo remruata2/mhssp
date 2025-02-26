@@ -49,9 +49,10 @@ export const ImageModal = ({ imageUrl, title, onClose }: ImageModalProps) => (
       <Image
         src={ensurePort8443(imageUrl)}
         alt={title}
-        width={1200}
-        height={800}
-        className="max-h-[80vh] w-auto object-contain"
+        fill
+        unoptimized={true}
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        className="object-cover rounded-lg"
       />
     </div>
   </motion.div>
