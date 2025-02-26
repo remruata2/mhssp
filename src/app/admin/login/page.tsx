@@ -61,12 +61,15 @@ export default function AdminLogin() {
 				return;
 			}
 
+			console.log("Result:", result);
 			if (result?.ok) {
+				console.log("Login successful");
 				router.push("/admin/dashboard");
 				router.refresh();
 			}
 		} catch (error: unknown) {
-			const message = error instanceof Error ? error.message : "An error occurred";
+			const message =
+				error instanceof Error ? error.message : "An error occurred";
 			setError(message);
 			setIsLoading(false);
 		}
