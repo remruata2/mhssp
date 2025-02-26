@@ -19,6 +19,18 @@ interface ImageModalProps {
   onClose: () => void;
 }
 
+// Utility function to ensure image URLs include port 8443
+const ensurePort8443 = (url: string): string => {
+  if (!url) return url;
+  
+  // Check if the URL is for mzhssp.in without a port
+  if (url.includes('mzhssp.in/uploads/') && !url.includes('mzhssp.in:')) {
+    return url.replace('mzhssp.in/', 'mzhssp.in:8443/');
+  }
+  
+  return url;
+};
+
 export const ImageModal = ({ imageUrl, title, onClose }: ImageModalProps) => (
   <motion.div
     initial={{ opacity: 0 }}
@@ -35,7 +47,7 @@ export const ImageModal = ({ imageUrl, title, onClose }: ImageModalProps) => (
         <FaTimes className="w-6 h-6" />
       </button>
       <Image
-        src={imageUrl}
+        src={ensurePort8443(imageUrl)}
         alt={title}
         width={1200}
         height={800}
@@ -59,7 +71,14 @@ export default function News({ children }: { children: ({ items }: { items: News
           throw new Error('Failed to fetch news');
         }
         const data = await response.json();
-        setNewsItems(data.data);
+        
+        // Process image URLs to ensure they include port 8443
+        const processedData = data.data.map((item: NewsItem) => ({
+          ...item,
+          images: item.images?.map(ensurePort8443) || []
+        }));
+        
+        setNewsItems(processedData);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to fetch news');
       } finally {
