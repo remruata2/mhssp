@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
 interface ImageGalleryProps {
@@ -16,14 +16,18 @@ export default function ImageGallery({ images, className, gridClassName, itemCla
   const startX = useRef<number | null>(null);
   const threshold = 40; // px swipe threshold
 
-  const openAt = (i: number) => {
+  const openAt = useCallback((i: number) => {
     setIndex(i);
     setOpen(true);
-  };
+  }, []);
 
-  const close = () => setOpen(false);
-  const prev = () => setIndex((i) => (i - 1 + images.length) % images.length);
-  const next = () => setIndex((i) => (i + 1) % images.length);
+  const close = useCallback(() => setOpen(false), []);
+  const prev = useCallback(() => {
+    setIndex((i) => (i - 1 + images.length) % images.length);
+  }, [images.length]);
+  const next = useCallback(() => {
+    setIndex((i) => (i + 1) % images.length);
+  }, [images.length]);
 
   // Keyboard controls
   useEffect(() => {
@@ -35,7 +39,7 @@ export default function ImageGallery({ images, className, gridClassName, itemCla
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
+  }, [open, close, prev, next]);
 
   // Touch handlers for swipe
   const onTouchStart = (e: React.TouchEvent) => {
