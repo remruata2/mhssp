@@ -1,43 +1,29 @@
-import React, { useState } from 'react';
+"use client";
 
-const AddPage = () => {
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
+import { useRouter } from "next/navigation";
+import PageForm from "./components/PageForm";
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    // Logic to save the page data goes here
-    console.log('Page added:', { title, content });
-    // Clear the form
-    setTitle('');
-    setContent('');
-  };
+export default function NewPage() {
+	const router = useRouter();
 
-  return (
-    <div>
-      <h1>Add New Page</h1>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Title:</label>
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>Content:</label>
-          <textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            required
-          />
-        </div>
-        <button type="submit">Add Page</button>
-      </form>
-    </div>
-  );
-};
+	const handleSubmit = async (data: any) => {
+		const res = await fetch("/api/pages", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(data),
+		});
+		if (res.ok) {
+			router.push("/admin/pages");
+		} else {
+			const text = await res.text();
+			alert(`Failed to create page: ${text}`);
+		}
+	};
 
-export default AddPage;
+	return (
+		<div className="container mx-auto px-4 py-8">
+			<h1 className="text-2xl font-bold mb-8">Create Page</h1>
+			<PageForm onSubmit={handleSubmit} />
+		</div>
+	);
+}

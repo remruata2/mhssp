@@ -13,6 +13,7 @@ export default function Navbar() {
 		{ name: "Home", href: "/" },
 		{ name: "Procurement", href: "/procurement" },
 		{ name: "CKSI", href: "/cksi" },
+		{ name: "CI", href: "/ci" },
 		{ name: "News", href: "/news" },
 		{ name: "Notice Board", href: "/notices" },
 		{ name: "Result Framework", href: "/pdo-indicators" },

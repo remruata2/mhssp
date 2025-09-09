@@ -135,6 +135,14 @@ export default function AdminLayout({
 							News
 						</Link>
 						<Link
+							href="/admin/pages"
+							className={`flex items-center px-6 py-3 text-white hover:bg-[#1192c3] ${
+								pathname.startsWith("/admin/pages") ? "bg-white/20" : ""
+							}`}
+						>
+							Pages
+						</Link>
+						<Link
 							href="/admin/notices"
 							className={`flex items-center px-6 py-3 text-white hover:bg-[#1192c3] ${
 								pathname.startsWith("/admin/notices") ? "bg-white/20" : ""

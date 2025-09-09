@@ -1,176 +1,225 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import RichTextEditor from './RichTextEditor';
+import { useState } from "react";
+import RichTextEditor from "./RichTextEditor";
 
 interface PageFormData {
-  title: string;
-  content: string;
-  slug: string;
-  isPublished: boolean;
-  showInMenu: boolean;
-  menuOrder: number;
+	title: string;
+	content: string;
+	slug: string;
+	isPublished: boolean;
+	showInMenu: boolean;
+	menuOrder: number;
+	category?: string;
+	thumbnailUrl?: string;
+	excerpt?: string;
 }
 
 interface PageFormProps {
-  onSubmit: (data: PageFormData) => void;
-  loading?: boolean;
-  initialData?: PageFormData & {
-    id?: string;
-  };
-  error?: string;
+	onSubmit: (data: PageFormData) => void;
+	loading?: boolean;
+	initialData?: PageFormData & {
+		id?: string;
+	};
+	error?: string;
 }
 
 export default function PageForm({
-  onSubmit,
-  loading = false,
-  initialData,
-  error,
+	onSubmit,
+	loading = false,
+	initialData,
+	error,
 }: PageFormProps) {
-  const [title, setTitle] = useState(initialData?.title || '');
-  const [content, setContent] = useState(initialData?.content || '');
-  const [slug, setSlug] = useState(initialData?.slug || '');
-  const [isPublished, setIsPublished] = useState(initialData?.isPublished || false);
-  const [showInMenu, setShowInMenu] = useState(initialData?.showInMenu || false);
-  const [menuOrder, setMenuOrder] = useState(initialData?.menuOrder || 0);
+	const [title, setTitle] = useState(initialData?.title || "");
+	const [content, setContent] = useState(initialData?.content || "");
+	const [slug, setSlug] = useState(initialData?.slug || "");
+	const [isPublished, setIsPublished] = useState(
+		initialData?.isPublished || false
+	);
+	const [showInMenu, setShowInMenu] = useState(
+		initialData?.showInMenu || false
+	);
+	const [menuOrder, setMenuOrder] = useState(initialData?.menuOrder || 0);
+	const [category, setCategory] = useState(initialData?.category || "");
+	const [thumbnailUrl, setThumbnailUrl] = useState(
+		initialData?.thumbnailUrl || ""
+	);
+	const [excerpt, setExcerpt] = useState(initialData?.excerpt || "");
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit({
-      title,
-      content,
-      slug,
-      isPublished,
-      showInMenu,
-      menuOrder,
-    });
-  };
+	const handleSubmit = (e: React.FormEvent) => {
+		e.preventDefault();
+		onSubmit({
+			title,
+			content,
+			slug,
+			isPublished,
+			showInMenu,
+			menuOrder,
+			category,
+			thumbnailUrl,
+			excerpt,
+		});
+	};
 
-  const generateSlug = (title: string) => {
-    return title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
-  };
+	const generateSlug = (title: string) => {
+		return title
+			.toLowerCase()
+			.replace(/[^a-z0-9]+/g, "-")
+			.replace(/^-+|-+$/g, "");
+	};
 
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newTitle = e.target.value;
-    setTitle(newTitle);
-    if (!initialData?.slug) {
-      setSlug(generateSlug(newTitle));
-    }
-  };
+	const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const newTitle = e.target.value;
+		setTitle(newTitle);
+		if (!initialData?.slug) {
+			setSlug(generateSlug(newTitle));
+		}
+	};
 
-  return (
-    <div className="space-y-6 max-w-3xl">
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {error && <div className="text-red-500">{error}</div>}
-        
-        <div>
-          <label htmlFor="title" className="form-label">
-            Title
-          </label>
-          <input
-            type="text"
-            id="title"
-            value={title}
-            onChange={handleTitleChange}
-            className="form-input"
-            required
-          />
-        </div>
+	return (
+		<div className="space-y-6 max-w-3xl">
+			<form onSubmit={handleSubmit} className="space-y-6">
+				{error && <div className="text-red-500">{error}</div>}
 
-        <div>
-          <label htmlFor="slug" className="form-label">
-            Slug
-          </label>
-          <input
-            type="text"
-            id="slug"
-            value={slug}
-            onChange={(e) => setSlug(e.target.value)}
-            className="form-input"
-            required
-          />
-        </div>
+				<div>
+					<label htmlFor="title" className="form-label">
+						Title
+					</label>
+					<input
+						type="text"
+						id="title"
+						value={title}
+						onChange={handleTitleChange}
+						className="form-input"
+						required
+					/>
+				</div>
 
-        <div>
-          <label htmlFor="content" className="form-label">
-            Content
-          </label>
-          <RichTextEditor
-            value={content}
-            onChange={setContent}
-            disabled={loading}
-          />
-        </div>
+				<div>
+					<label htmlFor="slug" className="form-label">
+						Slug
+					</label>
+					<input
+						type="text"
+						id="slug"
+						value={slug}
+						onChange={(e) => setSlug(e.target.value)}
+						className="form-input"
+						required
+					/>
+				</div>
 
-        <div className="flex items-center space-x-6">
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="isPublished"
-              checked={isPublished}
-              onChange={(e) => setIsPublished(e.target.checked)}
-              className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-            />
-            <label
-              htmlFor="isPublished"
-              className="ml-2 form-label"
-            >
-              Published
-            </label>
-          </div>
+				<div>
+					<label htmlFor="content" className="form-label">
+						Content
+					</label>
+					<RichTextEditor
+						value={content}
+						onChange={setContent}
+						disabled={loading}
+					/>
+				</div>
 
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="showInMenu"
-              checked={showInMenu}
-              onChange={(e) => setShowInMenu(e.target.checked)}
-              className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-            />
-            <label
-              htmlFor="showInMenu"
-              className="ml-2 form-label"
-            >
-              Show in Navigation
-            </label>
-          </div>
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+					<div>
+						<label htmlFor="category" className="form-label">
+							Category
+						</label>
+						<input
+							type="text"
+							id="category"
+							value={category}
+							onChange={(e) => setCategory(e.target.value)}
+							className="form-input"
+							placeholder="e.g. ci"
+						/>
+					</div>
+					<div>
+						<label htmlFor="thumbnailUrl" className="form-label">
+							Thumbnail URL
+						</label>
+						<input
+							type="text"
+							id="thumbnailUrl"
+							value={thumbnailUrl}
+							onChange={(e) => setThumbnailUrl(e.target.value)}
+							className="form-input"
+							placeholder="https://..."
+						/>
+					</div>
+				</div>
 
-          <div className="flex items-center space-x-2">
-            <label
-              htmlFor="menuOrder"
-              className="form-label"
-            >
-              Menu Order:
-            </label>
-            <input
-              type="number"
-              id="menuOrder"
-              value={menuOrder}
-              onChange={(e) => setMenuOrder(parseInt(e.target.value) || 0)}
-              min="0"
-              className="form-input w-20"
-            />
-            <span className="text-sm text-gray-500">
-              (Lower numbers appear first)
-            </span>
-          </div>
-        </div>
+				<div>
+					<label htmlFor="excerpt" className="form-label">
+						Excerpt
+					</label>
+					<textarea
+						id="excerpt"
+						value={excerpt}
+						onChange={(e) => setExcerpt(e.target.value)}
+						className="form-input"
+						rows={3}
+						placeholder="Short description for card previews"
+					/>
+				</div>
 
-        <div className="flex justify-end">
-          <button
-            type="submit"
-            disabled={loading}
-            className={`inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${
-              loading ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
-          >
-            {loading ? 'Saving...' : 'Save'}
-          </button>
-        </div>
-      </form>
-    </div>
-  );
+				<div className="flex items-center space-x-6">
+					<div className="flex items-center">
+						<input
+							type="checkbox"
+							id="isPublished"
+							checked={isPublished}
+							onChange={(e) => setIsPublished(e.target.checked)}
+							className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+						/>
+						<label htmlFor="isPublished" className="ml-2 form-label">
+							Published
+						</label>
+					</div>
+
+					<div className="flex items-center">
+						<input
+							type="checkbox"
+							id="showInMenu"
+							checked={showInMenu}
+							onChange={(e) => setShowInMenu(e.target.checked)}
+							className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+						/>
+						<label htmlFor="showInMenu" className="ml-2 form-label">
+							Show in Navigation
+						</label>
+					</div>
+
+					<div className="flex items-center space-x-2">
+						<label htmlFor="menuOrder" className="form-label">
+							Menu Order:
+						</label>
+						<input
+							type="number"
+							id="menuOrder"
+							value={menuOrder}
+							onChange={(e) => setMenuOrder(parseInt(e.target.value) || 0)}
+							min="0"
+							className="form-input w-20"
+						/>
+						<span className="text-sm text-gray-500">
+							(Lower numbers appear first)
+						</span>
+					</div>
+				</div>
+
+				<div className="flex justify-end">
+					<button
+						type="submit"
+						disabled={loading}
+						className={`inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${
+							loading ? "opacity-50 cursor-not-allowed" : ""
+						}`}
+					>
+						{loading ? "Saving..." : "Save"}
+					</button>
+				</div>
+			</form>
+		</div>
+	);
 }
