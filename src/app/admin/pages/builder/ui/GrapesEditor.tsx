@@ -32,7 +32,8 @@ export default function GrapesEditor({ initialHtml = "" }: Props) {
 				container: editorRef.current!,
 				fromElement: false,
 				height: "100%",
-				storageManager: { type: null },
+				// Disable built-in storage; we handle export/save ourselves
+				storageManager: false,
 				plugins: [presetWebpage],
 				canvas: {
 					// Load Tailwind runtime so Tailwind classes render inside the editor canvas
