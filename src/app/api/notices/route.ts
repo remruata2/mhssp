@@ -5,6 +5,7 @@ import { SubNotice } from "@/models/SubNotice";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import { existsSync } from "fs";
+import { auth } from "@/lib/auth";
 
 // Helper function to save PDF file
 async function savePDF(file: File): Promise<string> {
@@ -51,6 +52,21 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
 	try {
+		// Authorization: only admins can create notices
+		const session = await auth();
+		if (!session) {
+			return NextResponse.json(
+				{ success: false, error: "Unauthorized" },
+				{ status: 401 }
+			);
+		}
+		if (session.user?.role !== "admin") {
+			return NextResponse.json(
+				{ success: false, error: "Forbidden" },
+				{ status: 403 }
+			);
+		}
+
 		await dbConnect();
 
 		const formData = await req.formData();
