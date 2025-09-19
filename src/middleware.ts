@@ -66,14 +66,14 @@ export async function middleware(request: NextRequest) {
 
 		if (!token) {
 			return NextResponse.json(
-				{ success: false, error: "Unauthorized" },
+				{ success: false, error: "Get Lost Loser" },
 				{ status: 401 }
 			);
 		}
 
 		if ((token as any).role !== "admin") {
 			return NextResponse.json(
-				{ success: false, error: "Forbidden" },
+				{ success: false, error: "Get Lost Loser" },
 				{ status: 403 }
 			);
 		}

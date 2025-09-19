@@ -23,8 +23,6 @@ export default function AdminLayout({
 		status: string;
 	};
 
-	console.log("Session status:", status);
-	console.log("Session data:", session);
 
 	const router = useRouter();
 	const pathname = usePathname();
