@@ -5,7 +5,7 @@ import { SubNotice } from "@/models/SubNotice";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import { existsSync } from "fs";
-import { auth } from "@/lib/auth";
+import { getToken } from "next-auth/jwt";
 
 // Helper function to save PDF file
 async function savePDF(file: File): Promise<string> {
@@ -53,14 +53,14 @@ export async function GET() {
 export async function POST(req: NextRequest) {
 	try {
 		// Authorization: only admins can create notices
-		const session = await auth();
-		if (!session) {
+		const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+		if (!token) {
 			return NextResponse.json(
 				{ success: false, error: "Unauthorized" },
 				{ status: 401 }
 			);
 		}
-		if (session.user?.role !== "admin") {
+		if ((token as any).role !== "admin") {
 			return NextResponse.json(
 				{ success: false, error: "Forbidden" },
 				{ status: 403 }

@@ -1,5 +1,4 @@
 // src/lib/auth.ts
-import NextAuth from "next-auth";
 import type { DefaultSession, NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
@@ -71,7 +70,7 @@ export const authOptions: NextAuthOptions = {
 						id: user._id.toHexString(),
 						name: user.username,
 						role: user.role,
-					};
+					} as any;
 				} catch (error) {
 					console.error("Auth error:", error);
 					throw error;
@@ -100,5 +99,3 @@ export const authOptions: NextAuthOptions = {
 	},
 	secret: process.env.NEXTAUTH_SECRET,
 };
-
-export const { auth, signIn, signOut } = NextAuth(authOptions);

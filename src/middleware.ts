@@ -46,9 +46,42 @@ export async function middleware(request: NextRequest) {
 		}
 	}
 
+	// 3. Protect API write methods for notices (block unauthenticated/unauthorized)
+	if (path.startsWith("/api/notices")) {
+		const isSafeMethod =
+			request.method === "GET" ||
+			request.method === "HEAD" ||
+			request.method === "OPTIONS";
+
+		// Allow safe methods without auth
+		if (isSafeMethod) {
+			return NextResponse.next();
+		}
+
+		// For write methods, require a valid admin token
+		const token = await getToken({
+			req: request,
+			secret: process.env.NEXTAUTH_SECRET,
+		});
+
+		if (!token) {
+			return NextResponse.json(
+				{ success: false, error: "Unauthorized" },
+				{ status: 401 }
+			);
+		}
+
+		if ((token as any).role !== "admin") {
+			return NextResponse.json(
+				{ success: false, error: "Forbidden" },
+				{ status: 403 }
+			);
+		}
+	}
+
 	return NextResponse.next();
 }
 
 export const config = {
-	matcher: ["/admin/:path*"],
+	matcher: ["/admin/:path*", "/api/notices/:path*"],
 };

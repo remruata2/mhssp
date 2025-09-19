@@ -6,7 +6,8 @@ import { SubNotice } from "@/models/SubNotice";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import { existsSync } from "fs";
-import { auth } from "@/lib/auth";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 interface Context {
 	params: Promise<{ id: string }>;
@@ -71,7 +72,7 @@ export async function GET(request: NextRequest, context: Context) {
 export async function PUT(req: NextRequest, context: Context) {
 	try {
 		// Authorization: only admins can update notices
-		const session = await auth();
+		const session = await getServerSession(authOptions);
 		if (!session) {
 			return NextResponse.json(
 				{ success: false, error: "Unauthorized" },
@@ -206,7 +207,7 @@ export async function PUT(req: NextRequest, context: Context) {
 export async function DELETE(request: NextRequest, context: Context) {
 	try {
 		// Authorization: only admins can delete notices
-		const session = await auth();
+		const session = await getServerSession(authOptions);
 		if (!session) {
 			return NextResponse.json(
 				{ success: false, error: "Unauthorized" },
