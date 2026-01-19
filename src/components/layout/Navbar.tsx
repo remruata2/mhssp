@@ -32,7 +32,7 @@ export default function Navbar() {
 				{ name: "Community Intervention", href: "/ci" },
 				{
 					name: "SBCC Reports",
-					href: "https://lookerstudio.google.com/embed/u/0/reporting/5bb5f9e8-c36d-4225-806d-0a6fa1d03479/page/p_xx9rxo9vzd",
+					href: "https://lookerstudio.google.com/embed/u/0/reporting/5bb5f9e8-c36d-4225-806d-0a6fa1d03479/page/fiZiF",
 					external: true,
 				},
 			],
