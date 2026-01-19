@@ -31,7 +31,7 @@ export default function Navbar() {
 			children: [
 				{ name: "Community Intervention", href: "/ci" },
 				{
-					name: "Pilot Intervention Data",
+					name: "SBCC Reports",
 					href: "https://lookerstudio.google.com/embed/u/0/reporting/5bb5f9e8-c36d-4225-806d-0a6fa1d03479/page/p_xx9rxo9vzd",
 					external: true,
 				},
@@ -79,9 +79,9 @@ export default function Navbar() {
 												<>
 													<Menu.Button
 														className={`flex items-center space-x-1 text-base font-medium transition-colors ${pathname === item.href ||
-																pathname.startsWith(item.href + "/")
-																? "text-[#1192c3]"
-																: "text-gray-700 hover:text-[#1192c3]"
+															pathname.startsWith(item.href + "/")
+															? "text-[#1192c3]"
+															: "text-gray-700 hover:text-[#1192c3]"
 															}`}
 													>
 														<span>{item.name}</span>
@@ -115,8 +115,8 @@ export default function Navbar() {
 																						: undefined
 																				}
 																				className={`block px-4 py-2 text-sm transition-colors ${active
-																						? "bg-gray-100 text-[#1192c3]"
-																						: "text-gray-700 hover:text-[#1192c3]"
+																					? "bg-gray-100 text-[#1192c3]"
+																					: "text-gray-700 hover:text-[#1192c3]"
 																					}`}
 																			>
 																				{child.name}
@@ -137,8 +137,8 @@ export default function Navbar() {
 										key={item.href}
 										href={item.href}
 										className={`text-base font-medium transition-colors ${pathname === item.href
-												? "text-[#1192c3]"
-												: "text-gray-700 hover:text-[#1192c3]"
+											? "text-[#1192c3]"
+											: "text-gray-700 hover:text-[#1192c3]"
 											}`}
 									>
 										{item.name}
@@ -202,9 +202,9 @@ export default function Navbar() {
 											<>
 												<Disclosure.Button
 													className={`flex w-full items-center justify-between px-3 py-2 rounded-md text-base font-medium transition-colors ${pathname === item.href ||
-															pathname.startsWith(item.href + "/")
-															? "text-[#1192c3] bg-gray-50"
-															: "text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+														pathname.startsWith(item.href + "/")
+														? "text-[#1192c3] bg-gray-50"
+														: "text-gray-700 hover:text-gray-900 hover:bg-gray-50"
 														}`}
 												>
 													<span>{item.name}</span>
@@ -241,8 +241,8 @@ export default function Navbar() {
 									key={item.href}
 									href={item.href}
 									className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${pathname === item.href
-											? "text-[#1192c3] bg-gray-50"
-											: "text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+										? "text-[#1192c3] bg-gray-50"
+										: "text-gray-700 hover:text-gray-900 hover:bg-gray-50"
 										}`}
 									onClick={() => setIsMobileMenuOpen(false)}
 								>
