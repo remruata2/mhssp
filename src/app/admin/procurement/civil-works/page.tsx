@@ -13,7 +13,7 @@ interface Contractor {
 
 interface CivilWorksProcurement {
 	_id: string;
-	lotNo: string;
+	lotNo?: string;
 	contractNo: string;
 	workName: string;
 	contractSignedDate: string;
@@ -31,7 +31,6 @@ export default function CivilWorksPage() {
 	const itemsPerPage = 10;
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [formData, setFormData] = useState({
-		lotNo: "",
 		contractNo: "",
 		workName: "",
 		contractSignedDate: "",
@@ -86,7 +85,6 @@ export default function CivilWorksPage() {
 		try {
 			// Validate required fields
 			if (
-				!formData.lotNo.trim() ||
 				!formData.contractNo.trim() ||
 				!formData.workName.trim() ||
 				!formData.contractSignedDate ||
@@ -170,8 +168,9 @@ export default function CivilWorksPage() {
 			setIsEditing(true);
 			setEditingId(civilWork._id);
 
+			const { lotNo, ...rest } = civilWork;
 			const formattedData = {
-				...civilWork,
+				...rest,
 				contractor: civilWork.contractor?._id || "",
 				contractSignedDate: civilWork.contractSignedDate
 					? new Date(civilWork.contractSignedDate).toISOString().split("T")[0]
@@ -205,7 +204,6 @@ export default function CivilWorksPage() {
 
 	const resetForm = () => {
 		setFormData({
-			lotNo: "",
 			contractNo: "",
 			workName: "",
 			contractSignedDate: "",
@@ -220,7 +218,6 @@ export default function CivilWorksPage() {
 	const filteredCivilWorks = civilWorks.filter((item) => {
 		const searchString = searchTerm.toLowerCase();
 		return (
-			(item.lotNo?.toLowerCase() || "").includes(searchString) ||
 			(item.contractNo?.toLowerCase() || "").includes(searchString) ||
 			(item.workName?.toLowerCase() || "").includes(searchString) ||
 			(item.contractor?.name?.toLowerCase() || "").includes(searchString)
@@ -270,16 +267,13 @@ export default function CivilWorksPage() {
 			<SearchAndFilter
 				searchTerm={searchTerm}
 				onSearchChange={setSearchTerm}
-				placeholder="Search by lot no, contract no, work name, or contractor..."
+				placeholder="Search by contract no, work name, or contractor..."
 			/>
 
 			<div className="bg-white shadow-md rounded-lg overflow-hidden mt-4">
 				<table className="min-w-full divide-y divide-gray-200">
 					<thead className="bg-gray-50">
 						<tr>
-							<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-								Lot No
-							</th>
 							<th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
 								Contract No
 							</th>
@@ -300,7 +294,6 @@ export default function CivilWorksPage() {
 					<tbody className="bg-white divide-y divide-gray-200">
 						{currentCivilWorks.map((item) => (
 							<tr key={item._id} className="hover:bg-gray-50">
-								<td className="px-6 py-4 whitespace-nowrap">{item.lotNo}</td>
 								<td className="px-6 py-4 whitespace-nowrap">
 									{item.contractNo}
 								</td>
@@ -350,22 +343,6 @@ export default function CivilWorksPage() {
 				}}
 			>
 				<form onSubmit={handleSubmit} className="space-y-4">
-					<div>
-						<label htmlFor="lotNo" className="form-label">
-							Lot No <span className="text-red-500">*</span>
-						</label>
-						<input
-							type="text"
-							id="lotNo"
-							name="lotNo"
-							value={formData.lotNo}
-							onChange={handleChange}
-							className="form-input"
-							placeholder="Enter lot number"
-							required
-						/>
-					</div>
-
 					<div>
 						<label htmlFor="contractNo" className="form-label">
 							Contract No <span className="text-red-500">*</span>

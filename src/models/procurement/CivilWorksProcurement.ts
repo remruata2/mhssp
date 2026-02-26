@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { IContractor } from "./Contractor";
 
 export interface ICivilWorksProcurement {
-  lotNo: string;
+  lotNo?: string;
   contractNo: string;
   workName: string;
   contractSignedDate: Date;
@@ -13,7 +13,7 @@ export interface ICivilWorksProcurement {
 
 const civilWorksProcurementSchema = new mongoose.Schema<ICivilWorksProcurement>(
   {
-    lotNo: { type: String, required: true },
+    lotNo: { type: String, required: false },
     contractNo: { type: String, required: true },
     workName: { type: String, required: true },
     contractSignedDate: { type: Date, required: true },
